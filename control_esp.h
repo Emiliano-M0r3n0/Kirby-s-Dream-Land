@@ -19,15 +19,9 @@
 
 typedef struct EjeJoystick{
 
-    Board *board; //Dispositivo al que esta conectado
-    uint8_t pin; //Pin al que esta conectado
-    float centro; //Centro calibrado
-    float filtrado; //Valor filtrado previo
-
-    float suma;
-    int muestras_objetivo;
-    int muestras_actuales;
-    bool calibrado; //true = si false = no
+    Board *board;
+    uint8_t pin;
+    float offset;   // diferencia respecto a 0.5
 
 }EjeJoystick;
 
@@ -35,8 +29,6 @@ void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin);
 
 void ini_calibracion(EjeJoystick *Eje, int muestras);
 
-void actualizar_calibracion(EjeJoystick *Eje);
-
-float leer_joystick(EjeJoystick *Eje);
+float leer_joystick(EjeJoystick *eje);
 
 #endif
