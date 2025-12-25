@@ -18,7 +18,6 @@
 #include <stdbool.h>
 #include <math.h>
 
-
 //RUTAS PARA LOS SPRITES DE KIRBY
 #define RUTA_KIRBY "Kirby/Kirby.bmp"
 #define RUTA_KIRBYMASK "Kirby/Kirbymask.bmp"
@@ -42,29 +41,6 @@
 #define BUTTON_JUMP 26
 #define BUTTON_ACTION 25
 #define BUTTON_DOWN 27
-
-typedef struct {
-    Imagen **frames; //Puntero a puntero porque es es un arreglo de punteros
-    int total_frames;
-    int frame_actual; //Nos indica en que frame nos encontramos
-    int delay_frames; //Delay entre cada frame
-    int contador; 
-} Animacion;
-
-Imagen* animacion_actual(Animacion *anim)
-{
-    anim->contador++;
-
-    if (anim->contador >= anim->delay_frames) {
-        anim->contador = 0;
-        anim->frame_actual++;
-        if (anim->frame_actual >= anim->total_frames) {
-            anim->frame_actual = 0;
-        }
-    }
-
-    return anim->frames[anim->frame_actual];
-}
 
 int main()
 {
@@ -98,8 +74,12 @@ int main()
     EjeJoystick EjeX;
     EjeJoystick EjeY;
 
+    Lectura lectura_general;
+
     ini_joystick(&EjeX,esp32,JX);
     ini_joystick(&EjeY,esp32,JY);
+
+    ini_lens(&lectura_general,esp32,BUTTON_ACTION,BUTTON_JUMP,BUTTON_DOWN,MTR);
 
     int tecla = ventana.teclaPresionada();
     ventana.colorFondo(COLORES.NEGRO);
@@ -110,31 +90,10 @@ int main()
     ini_calibracion(&EjeX,500);
     ini_calibracion(&EjeY,500);
 
-    float v = 0.0f;
-    bool btn_action = false;
-    bool btn_jump = false;
-    bool btn_down = false;
 
 while (1)
 {
-    btn_action = esp32->digitalRead(esp32,BUTTON_ACTION);
-    btn_jump = esp32->digitalRead(esp32,BUTTON_JUMP);
-    btn_down = esp32->digitalRead(esp32,BUTTON_DOWN);
-
-    v = leer_joystick(&EjeX);
-
-    ventana.imprimeEnConsola("LensX: %.2f | Btn-action: %i | Btn-jump : %i | Btn-down: %i\n",v,btn_action,btn_jump,btn_down);
- 
-    if (!btn_action)
-    {
-        esp32->digitalWrite(esp32,MTR,true);
-    }
-    else
-    {
-        esp32->digitalWrite(esp32,MTR,false);
-    }
-    
-    ventana.espera(50);
+    leer_entrada(&lectura_general,&EjeX,true);
 }
 return 0;
 }

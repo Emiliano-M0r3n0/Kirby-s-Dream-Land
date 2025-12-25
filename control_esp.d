@@ -269,7 +269,7 @@ control_esp.o: control_esp.c control_esp.h simplecontroller.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/corecrt_stdio_config.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/_mingw_off_t.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/swprintf.inl \
- C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/stdio_s.h graficos.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stdint.h \
- C:/Strawberry/c/x86_64-w64-mingw32/include/stdint.h graficos.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/stdint.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/math.h
