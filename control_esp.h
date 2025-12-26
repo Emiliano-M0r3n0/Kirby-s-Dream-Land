@@ -43,11 +43,13 @@ typedef struct Lectura{
 }Lectura;
 
 typedef struct Animacion{
+
     Imagen **frames; //Puntero a puntero porque es es un arreglo de punteros
-    int total_frames;
+    int total_frames; //Numero total de frames
     int frame_actual; //Nos indica en que frame nos encontramos
     int delay_frames; //Delay entre cada frame
     int contador; 
+
 } Animacion;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
