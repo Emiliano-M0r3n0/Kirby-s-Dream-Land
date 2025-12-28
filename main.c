@@ -108,32 +108,94 @@ int main()
     const int ESCALA = 65;
     const int DELAY = 50;
 
+    //Arreglos de rutas
+    const char *kirby_walk_r[] = {
+        "Kirby/Kirby4.bmp",
+        "Kirby/Kirby24.bmp",
+        "Kirby/Kirby5.bmp",
+        "Kirby/Kirby6.bmp"
+    };
+
+    const char *kirby_walk_r_mask[] = {
+        "Kirby/Kirby4mask.bmp",
+        "Kirby/Kirby24mask.bmp",
+        "Kirby/Kirby5mask.bmp",
+        "Kirby/Kirby6mask.bmp"
+    };
+
+    const char *kirby_eat_r[] = {
+        "Kirby/Kirby7.bmp",
+        "Kirby/Kirby8.bmp",
+        "Kirby/Kirby23.bmp",
+        "Kirby/Kirby22.bmp",
+        "Kirby/Kirby19.bmp"
+    };
+
+    const char *kirby_eat_r_mask[] = {
+        "Kirby/Kirby7mask.bmp",
+        "Kirby/Kirby8mask.bmp",
+        "Kirby/Kirby23mask.bmp",
+        "Kirby/Kirby22mask.bmp",
+        "Kirby/Kirby19mask.bmp" 
+    };
+
+    const char* kirbyfat_walk_r[] = {
+        "Kirby/Kirby16.bmp",
+        "Kirby/Kirby17.bmp",
+        "Kirby/Kirby18.bmp"
+    };
+
+    const char* kirbyfat_walk_r_mask[] = {
+        "Kirby/Kirby16mask.bmp",
+        "Kirby/Kirby17mask.bmp",
+        "Kirby/Kirby18mask.bmp"
+    };
+
+    const char* kirbyfatair_walk_r[] = {
+        "Kirby/Kirby19.bmp",
+        "Kirby/Kirby14.bmp",
+        "Kirby/Kirby15.bmp"
+    };
+
+    const char* kirbyfatair_walk_r_mask[] = {
+        "Kirby/Kirby19mask.bmp",
+        "Kirby/Kirby14mask.bmp",
+        "Kirby/Kirby15mask.bmp"
+    };
+
+    const char* kirby_spit_r[] = {
+        "Kirby/Kirby13.bmp",
+        "Kirby/Kirby8.bmp",
+        "Kirby/Kirby7.bmp"
+    };
+
+    const char* kirby_spit_r_mask[] = {
+        "Kirby/Kirby13mask.bmp",
+        "Kirby/Kirby8mask.bmp",
+        "Kirby/Kirby7mask.bmp"
+    };
+
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
 
-    Imagen *kirby = ventana.creaImagenConMascara(RUTA_KIRBY,RUTA_KIRBYMASK);
-    Imagen *kirby2 = ventana.creaImagenConMascara(RUTA_KIRBY2,RUTA_KIRBY2MASK);
-    Imagen *kirby4 = ventana.creaImagenConMascara(RUTA_KIRBY4,RUTA_KIRBY4MASK);
-    Imagen *kirby5 = ventana.creaImagenConMascara(RUTA_KIRBY5,RUTA_KIRBY5MASK); 
-    Imagen *kirby6 = ventana.creaImagenConMascara(RUTA_KIRBY6,RUTA_KIRBY6MASK);
-    Imagen *kirby7 = ventana.creaImagenConMascara(RUTA_KIRBY7,RUTA_KIRBY7MASK);
-    Imagen *kirby8 = ventana.creaImagenConMascara(RUTA_KIRBY8,RUTA_KIRBY8MASK);
-    Imagen *kirby9 = ventana.creaImagenConMascara(RUTA_KIRBY9,RUTA_KIRBY9MASK);
-    Imagen *kirby11 = ventana.creaImagenConMascara(RUTA_KIRBY11,RUTA_KIRBY11MASK);
-    Imagen *kirby12 = ventana.creaImagenConMascara(RUTA_KIRBY12,RUTA_KIRBY12MASK);
-    Imagen *kirby13 = ventana.creaImagenConMascara(RUTA_KIRBY13,RUTA_KIRBY13MASK);
-    Imagen *kirby14 = ventana.creaImagenConMascara(RUTA_KIRBY14,RUTA_KIRBY14MASK);
-    Imagen *kirby15 = ventana.creaImagenConMascara(RUTA_KIRBY15,RUTA_KIRBY15MASK);
-    Imagen *kirby16 = ventana.creaImagenConMascara(RUTA_KIRBY16,RUTA_KIRBY16MASK);
-    
+    //Creacion de las animaciones
+    Animacion kirby_caminando_r;
+    Animacion kirby_comiendo_r;
+    Animacion kirbyfat_caminando_r;
+    Animacion kirbyfatair_caminando_r;
+    Animacion kirby_escupiendo_r;
 
-    Imagen *caminar_derecha[] = { kirby4, kirby6, kirby5 };
-    Imagen *sprite_quieto = kirby;
-    Imagen *sprite_aireidle = kirby2;
-    Imagen *sprite_actual;
+    Imagen *sprite; //Imagen que utilizaremos constantemente
 
-    Animacion anim_derecha = {caminar_derecha,3,0,5,0};
+    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,0,&kirby_caminando_r);
+    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,0,&kirby_comiendo_r);
+    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,3,0,&kirbyfat_caminando_r);
+    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,3,0,&kirbyfatair_caminando_r);
+    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,0,&kirby_escupiendo_r);
+
+    Imagen *kirbyidle = ventana.creaImagenConMascara(RUTA_KIRBY,RUTA_KIRBYMASK);
+    Imagen *kirbyjump = ventana.creaImagenConMascara(RUTA_KIRBY2,RUTA_KIRBY2MASK);
 
     //Configuraciones y calibraciones del Esp32
     Board *esp32 = connectDevice("COM6",B115200);
@@ -170,6 +232,7 @@ int main()
     float velY = 0.0f;
 
     bool en_aire = false;
+    bool kirbyfat = false;
     float velocidad_salto = 0.0f;
 
 while (1)
@@ -180,56 +243,79 @@ leer_entrada(&lectura_general, &EjeX, false);
 velX = lectura_general.lensX * SPEED_X;
 posX += velX * DT;
 
-//Limites de la pantalla
+//Limites laterales
 if (posX < 0) posX = 0;
 if (posX > ventana.anchoVentana() - ESCALA)
     posX = ventana.anchoVentana() - ESCALA;
 
-/* ---- SALTO ---- */
-if (!lectura_general.lens_jump && !en_aire)
-{
-    en_aire = true;
-    velocidad_salto = SALTO_FUERZA;
-    sprite_actual = sprite_aireidle;
-}
-
+//Fisica del eje vertical
 if (en_aire)
 {
-    velocidad_salto -= GRAVEDAD * DT;
-    posY -= velocidad_salto * DT;
-
-    //Suelo (Limite del eje Y)
-    if (posY >= ventana.altoVentana() - 50)
+    if (kirbyfat)
     {
-        posY = ventana.altoVentana() - 50;
-        en_aire = false;
-        velocidad_salto = 0.0f;
+        // Kirby inflado puede mantenerse
+        if (!lectura_general.lens_jump)
+        {
+            posY -= SALTO_FUERZA * DT;
+        }
+        else
+        {
+            posY += GRAVEDAD * DT;
+        }
     }
-}
-
-/* ---- SELECCIÓN DE SPRITE ---- */
-
-if (fabs(velX) > 5.0f)
-{
-    sprite_actual = animacion_actual(&anim_derecha);
+    else
+    {
+        posY += GRAVEDAD * DT;
+    }
 }
 else
 {
-    sprite_actual = sprite_quieto;
+    // En el suelo
+    if (!lectura_general.lens_jump)
+    {
+        velocidad_salto = SALTO_FUERZA;
+        en_aire = true;
+        posY -= velocidad_salto * DT;
+    }
+
+    if (!lectura_general.lens_action)
+    {
+        kirbyfat = true;
+    }
 }
 
-/* ---- DIBUJO ---- */
-ventana.limpiaVentana();
-ventana.muestraImagenEscalada(
-    (int)posX,
-    (int)posY,
-    ESCALA,
-    ESCALA,
-    sprite_actual
-);
-ventana.actualizaVentana();
-ventana.espera(10);
+//Limites verticales
+if (posY >= ventana.altoVentana() - 50)
+{
+    posY = ventana.altoVentana() - 50;
+    en_aire = false;
+}
 
+if (posY < ESCALA)
+    posY = ESCALA;
+
+//Seleccion de animacion
+
+if (en_aire)
+{
+    if (kirbyfat)
+        sprite = animacion_actual(&kirbyfatair_caminando_r);
+    else
+        sprite = kirbyjump;
+}
+else
+{
+    if (fabs(velX) > 5.0f)
+        sprite = animacion_actual(&kirby_caminando_r);
+    else
+        sprite = kirbyidle; // idle
+}
+
+//Mostrando en pantalla
+ventana.limpiaVentana();
+ventana.muestraImagenEscalada((int)posX, (int)posY, ESCALA, ESCALA, sprite);
+ventana.actualizaVentana();
+ventana.espera(16);
 
 }
 return 0;

@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/// @brief Estructura utilizada para encapsular las lecturas del joystick
 typedef struct EjeJoystick{
 
     Board *board;
@@ -26,10 +27,11 @@ typedef struct EjeJoystick{
 
 }EjeJoystick;
 
+/// @brief Estructura utilizada para encapsular las lecturas de los botones y del joystick
 typedef struct Lectura{
 
     Board *board;
-    float lensX;
+    float lensX; //Se guarda el resultado de la funcion leer_joystick
 
     bool lens_action;
     bool lens_jump;
@@ -42,6 +44,7 @@ typedef struct Lectura{
 
 }Lectura;
 
+/// @brief Estructura que alberga un arreglo de frames (Imagenes) y permite manipularlos como animacion
 typedef struct Animacion{
 
     Imagen **frames; //Puntero a puntero porque es es un arreglo de punteros
@@ -83,6 +86,17 @@ void ini_lens(Lectura *lens,Board *board,uint8_t pin_action, uint8_t pin_jump, u
 /// @param terminal (true) en caso de querer ver una terminal con los valores que leemos
 void leer_entrada(Lectura *lens,EjeJoystick *EjeX,bool terminal);
 
+/// @brief Selecciona un frame del arreglo y lo devuelve generando la animacion
+/// @param anim Animacion deseada
+/// @return Frame del arreglo
 Imagen* animacion_actual(Animacion *anim);
+
+/// @brief Carga los datos necesarios a la estructura animacion, con las rutas ingresadas se crean las imagenes
+/// @param rutas_img Rutas de las imagenes pertenecientes a la animacion
+/// @param rutas_mask Rutas de las mascaras
+/// @param total_frames Numero total de imagenes
+/// @param delay_frames Numero de frames de delay
+/// @param anim Estructura en la que se guardara
+void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim); 
 
 #endif

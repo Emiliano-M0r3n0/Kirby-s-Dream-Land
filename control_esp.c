@@ -2,6 +2,11 @@
 #include "graficos.h"
 #include <math.h>
 
+#define SPEED_X 400.0f
+#define SALTO_FUERZA 450.0f
+#define GRAVEDAD 1200.0f
+#define DT (1.0f / 60.0f)
+
 void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin)
 {
     Eje->board = board;
@@ -80,4 +85,18 @@ Imagen* animacion_actual(Animacion *anim)
     }
 
     return anim->frames[anim->frame_actual];
+}
+
+void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim) 
+{
+    anim->frames = malloc(sizeof(Imagen*) * total_frames);
+
+    for (int i = 0; i < total_frames; i++) {
+        anim->frames[i] = ventana.creaImagenConMascara(rutas_img[i],rutas_mask[i]);
+    }
+
+    anim->total_frames = total_frames;
+    anim->frame_actual = 0;
+    anim->contador = 0;
+    anim->delay_frames = delay_frames;
 }
