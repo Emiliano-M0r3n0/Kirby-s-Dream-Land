@@ -99,6 +99,9 @@
 //Constantes
 #define SPEED_X 400.0f
 #define SALTO_FUERZA 450.0f
+#define FLY_SPEED 600.0f
+#define TIEMPO_COMER 15.0f
+#define TIEMPO_ESCUPIR 7.5f
 #define GRAVEDAD 1200.0f
 #define DT (1.0f / 60.0f)
 
@@ -175,27 +178,52 @@ int main()
         "Kirby/Kirby7mask.bmp"
     };
 
+    const char* kirby_idle_r[] = {
+        "Kirby/Kirby.bmp",
+        "Kirby/Kirby.bmp"
+    };
+
+    const char* kirby_idle_r_mask[] = {
+        "Kirby/Kirbymask.bmp",
+        "Kirby/Kirbymask.bmp"
+    };
+
+    const char* kirby_jump_r[] = {
+        "Kirby/Kirby2.bmp",
+        "Kirby/Kirby2.bmp"
+    };
+
+    const char* kirby_jump_r_mask[] = {
+        "Kirby/Kirby2mask.bmp",
+        "Kirby/Kirby2mask.bmp"
+    };
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
 
+    Imagen *kirbyidle = ventana.creaImagenConMascara(RUTA_KIRBY,RUTA_KIRBYMASK);
+    Imagen *kirbyjump = ventana.creaImagenConMascara(RUTA_KIRBY2,RUTA_KIRBY2MASK);
+
     //Creacion de las animaciones
-    Animacion kirby_caminando_r;
-    Animacion kirby_comiendo_r;
-    Animacion kirbyfat_caminando_r;
-    Animacion kirbyfatair_caminando_r;
-    Animacion kirby_escupiendo_r;
+    Animacion animkirby_caminando_r;
+    Animacion animkirby_comiendo_r;
+    Animacion animkirbyfat_caminando_r;
+    Animacion animkirbyfatair_caminando_r;
+    Animacion animkirby_escupiendo_r;
+
+    //Animacion de salto/caida e idle estas son especiales ya que solo son un frame
+    Animacion animkirbyidle;
+    Animacion animkirbyjump;
 
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
-    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,0,&kirby_caminando_r);
-    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,0,&kirby_comiendo_r);
-    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,3,0,&kirbyfat_caminando_r);
-    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,3,0,&kirbyfatair_caminando_r);
-    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,0,&kirby_escupiendo_r);
-
-    Imagen *kirbyidle = ventana.creaImagenConMascara(RUTA_KIRBY,RUTA_KIRBYMASK);
-    Imagen *kirbyjump = ventana.creaImagenConMascara(RUTA_KIRBY2,RUTA_KIRBY2MASK);
+    cargar_animacion(kirby_idle_r,kirby_idle_r_mask,2,0,&animkirbyidle);
+    cargar_animacion(kirby_jump_r,kirby_jump_r_mask,2,0,&animkirbyjump);
+    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,0,&animkirby_caminando_r);
+    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,0,&animkirby_comiendo_r);
+    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,3,0,&animkirbyfat_caminando_r);
+    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,3,0,&animkirbyfatair_caminando_r);
+    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,0,&animkirby_escupiendo_r);
 
     //Configuraciones y calibraciones del Esp32
     Board *esp32 = connectDevice("COM6",B115200);
@@ -225,98 +253,31 @@ int main()
     ini_calibracion(&EjeX,500);
     ini_calibracion(&EjeY,500);
 
-    float posX = 20.0f;
-    float posY = ventana.altoVentana() - 20;
+    Animacion *anim_act;
 
-    float velX = 0.0f;
-    float velY = 0.0f;
-
-    bool en_aire = false;
-    bool kirbyfat = false;
-    float velocidad_salto = 0.0f;
+    Kirby kirby;
+    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);
 
 while (1)
 {
-leer_entrada(&lectura_general, &EjeX, false);
+    /* ================== 1. LECTURA DE ENTRADAS ================== */
+    leer_entrada(&lectura_general, &EjeX, false);
 
-//Movimiento horizontal
-velX = lectura_general.lensX * SPEED_X;
-posX += velX * DT;
+    //lectura_general.lens_jump = true;
+    //lectura_general.lens_action = true;
 
-//Limites laterales
-if (posX < 0) posX = 0;
-if (posX > ventana.anchoVentana() - ESCALA)
-    posX = ventana.anchoVentana() - ESCALA;
+    actualizar_kirby(&kirby,&lectura_general,DT,ventana.anchoVentana(),ventana.altoVentana());
 
-//Fisica del eje vertical
-if (en_aire)
-{
-    if (kirbyfat)
-    {
-        // Kirby inflado puede mantenerse
-        if (!lectura_general.lens_jump)
-        {
-            posY -= SALTO_FUERZA * DT;
-        }
-        else
-        {
-            posY += GRAVEDAD * DT;
-        }
-    }
-    else
-    {
-        posY += GRAVEDAD * DT;
-    }
-}
-else
-{
-    // En el suelo
-    if (!lectura_general.lens_jump)
-    {
-        velocidad_salto = SALTO_FUERZA;
-        en_aire = true;
-        posY -= velocidad_salto * DT;
-    }
+    seleccionar_animacion_kirby(&kirby,&animkirbyidle,&animkirby_caminando_r,&animkirbyjump,
+                                &animkirby_comiendo_r,&animkirbyfat_caminando_r,
+                                &animkirbyfatair_caminando_r,&animkirby_escupiendo_r);
 
-    if (!lectura_general.lens_action)
-    {
-        kirbyfat = true;
-    }
-}
+    sprite = animacion_actual(kirby.animActual);
 
-//Limites verticales
-if (posY >= ventana.altoVentana() - 50)
-{
-    posY = ventana.altoVentana() - 50;
-    en_aire = false;
-}
-
-if (posY < ESCALA)
-    posY = ESCALA;
-
-//Seleccion de animacion
-
-if (en_aire)
-{
-    if (kirbyfat)
-        sprite = animacion_actual(&kirbyfatair_caminando_r);
-    else
-        sprite = kirbyjump;
-}
-else
-{
-    if (fabs(velX) > 5.0f)
-        sprite = animacion_actual(&kirby_caminando_r);
-    else
-        sprite = kirbyidle; // idle
-}
-
-//Mostrando en pantalla
-ventana.limpiaVentana();
-ventana.muestraImagenEscalada((int)posX, (int)posY, ESCALA, ESCALA, sprite);
-ventana.actualizaVentana();
-ventana.espera(16);
-
+    ventana.limpiaVentana();
+    ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
+    ventana.actualizaVentana();
+    ventana.espera(16);
 }
 return 0;
 }

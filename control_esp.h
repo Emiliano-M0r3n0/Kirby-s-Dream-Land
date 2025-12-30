@@ -18,6 +18,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define ST_IDLE          0
+#define ST_WALKING       1
+#define ST_JUMPING       2
+#define ST_EATING        3
+#define ST_FAT_IDLE      4
+#define ST_FAT_FLYING    5
+#define ST_SPITTING      6
+
+#define SPEED_X 400.0f
+#define SALTO_FUERZA 450.0f
+#define GRAVEDAD 1200.0f
+#define DT (1.0f / 60.0f)
+
 /// @brief Estructura utilizada para encapsular las lecturas del joystick
 typedef struct EjeJoystick{
 
@@ -54,6 +67,25 @@ typedef struct Animacion{
     int contador; 
 
 } Animacion;
+
+typedef struct Kirby {
+    // Timers
+    float timerAccion;
+    // Posición y Física
+    float x, y;
+    float velX, velY;
+    int estado;
+    bool mirandoDerecha;
+    //Variables que guardan el pulso (flancos)
+    bool jump_p;
+    bool action_p;
+    //Memoria de que boton fue presionado
+    bool jump_prev;
+    bool action_prev;
+    // Punteros a las animaciones 
+    Animacion *animActual;
+    
+} Kirby;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
 /// @param Eje Direccion del Eje el cual inicializaremos
@@ -99,4 +131,11 @@ Imagen* animacion_actual(Animacion *anim);
 /// @param anim Estructura en la que se guardara
 void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim); 
 
+
+void ini_kirby(Kirby *k, float x, float y);
+
+void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int altoVentana);
+
+void seleccionar_animacion_kirby(Kirby *k, Animacion *idle, Animacion *walk, Animacion *jump, 
+    Animacion *eat, Animacion *fat_idle, Animacion *fly, Animacion *spit); 
 #endif
