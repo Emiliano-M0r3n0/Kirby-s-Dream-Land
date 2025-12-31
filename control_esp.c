@@ -54,8 +54,8 @@ void leer_entrada(Lectura *lens,EjeJoystick *EjeX,bool terminal)
 
     lens->lensX = leer_joystick(EjeX);
 
-    if (!(lens->lens_action)) lens->board->digitalWrite(lens->board,lens->pin_mtr,true);
-    else lens->board->digitalWrite(lens->board,lens->pin_mtr,false);
+    //if (!(lens->lens_action)) lens->board->digitalWrite(lens->board,lens->pin_mtr,true);
+    //else lens->board->digitalWrite(lens->board,lens->pin_mtr,false);
     
     if(terminal)
 {    ventana.imprimeEnConsola("LensX: %.2f | Btn-action: %i | Btn-jump : %i | Btn-down: %i\n",
@@ -126,6 +126,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         
         case ST_IDLE:
             k->velX = 0;
+            k->velY += GRAVEDAD * dt;
             if (fabs(input->lensX) > 0.1f) k->estado = ST_WALKING;
             if (k->jump_p) { k->velY = -450.0f; k->estado = ST_JUMPING; }
             if (k->action_p) { k->estado = ST_EATING; k->timerAccion = 0; }
@@ -133,6 +134,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 
         case ST_WALKING:
             k->velX = input->lensX * 400.0f;
+            k->velY += GRAVEDAD *dt;
             if (fabs(input->lensX) <= 0.1f) k->estado = ST_IDLE;
             if (k->jump_p) { k->velY = -450.0f; k->estado = ST_JUMPING; }
             if (k->action_p) { k->estado = ST_EATING; k->timerAccion = 0; }
@@ -141,17 +143,29 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         case ST_JUMPING:
             k->velX = input->lensX * 400.0f;
             k->velY += 1200.0f * dt; // Gravedad normal
-            if (k->y >= altoVentana - 50) { k->estado = ST_IDLE; k->velY = 0; }
+            if (k->y >= altoVentana - 70) { k->estado = ST_IDLE; k->velY = 0; }
             break;
 
         case ST_EATING:
             k->velX = 0;
+            k->velY = GRAVEDAD * dt;
             k->timerAccion += dt;
-            if (k->timerAccion >= 0.5f) k->estado = ST_FAT_IDLE; // TIEMPO_COMER
+            input->board->digitalWrite(input->board,input->pin_mtr,true);
+            if (k->timerAccion >= 0.5f){ k->estado = ST_FAT_IDLE; input->board->digitalWrite(input->board,input->pin_mtr,false);} // TIEMPO_COMER
             break;
 
         case ST_FAT_IDLE:
             k->velX = 0;
+            k->velY = (GRAVEDAD * 0.2f) *dt;
+            if (fabs(input->lensX) > 0.1f) k->estado = ST_FAT_WALKING;
+            if (k->jump_p) { k->velY = -300.0f; k->estado = ST_FAT_FLYING; }
+            if (k->action_p) { k->estado = ST_SPITTING; k->timerAccion = 0; }
+            break;
+
+        case ST_FAT_WALKING:
+            k->velX = input->lensX * 400.0f;
+            k->velY = (GRAVEDAD * 0.2f) *dt;
+            if (fabs(input->lensX) <= 0.1f) k->estado = ST_FAT_IDLE;
             if (k->jump_p) { k->velY = -300.0f; k->estado = ST_FAT_FLYING; }
             if (k->action_p) { k->estado = ST_SPITTING; k->timerAccion = 0; }
             break;
@@ -161,13 +175,15 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
             k->velY += (1200.0f * 0.3f) * dt; // Gravedad reducida (flota)
             if (k->jump_p) k->velY = -300.0f; // Salto infinito
             if (k->action_p) { k->estado = ST_SPITTING; k->timerAccion = 0; }
-            if (k->y >= altoVentana - 50) { k->estado = ST_FAT_IDLE; k->velY = 0; }
+            if (k->y >= altoVentana - 70) { k->estado = ST_FAT_IDLE; k->velY = 0; }
             break;
 
         case ST_SPITTING:
             k->velX = 0;
+            k->velY = GRAVEDAD *dt;
             k->timerAccion += dt;
-            if (k->timerAccion >= 0.4f) k->estado = ST_IDLE; // TIEMPO_ESCUPIR
+            input->board->digitalWrite(input->board,input->pin_mtr,true);
+            if (k->timerAccion >= 0.4f) {k->estado = ST_IDLE; input->board->digitalWrite(input->board,input->pin_mtr,false); } // TIEMPO_ESCUPIR
             break;
     }
 
@@ -177,21 +193,27 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 
     if (k->x < 0) k->x = 0;
     if (k->x > anchoVentana - 64) k->x = anchoVentana - 64;
-    if (k->y > altoVentana - 50) k->y = altoVentana - 50;
+    if (k->y > altoVentana - 70) k->y = altoVentana - 70;
     if (k->y < 60) k->y = 60;
 }
 
 void seleccionar_animacion_kirby(Kirby *k, 
     Animacion *idle, Animacion *walk, Animacion *jump, 
-    Animacion *eat, Animacion *fat_idle, Animacion *fly, Animacion *spit) 
+    Animacion *eat, Animacion *fat_idle, Animacion *fat_walk, Animacion *fly, Animacion *fat_fall, Animacion *spit) 
 {
-    switch (k->estado) {
-        case ST_IDLE:       k->animActual = idle; break;
-        case ST_WALKING:    k->animActual = walk; break;
-        case ST_JUMPING:    k->animActual = jump; break;
-        case ST_EATING:     k->animActual = eat; break;
-        case ST_FAT_IDLE:   k->animActual = fat_idle; break;
-        case ST_FAT_FLYING: k->animActual = fly; break;
-        case ST_SPITTING:   k->animActual = spit; break;
+if (k->estado == ST_IDLE) k->animActual = idle;
+    else if (k->estado == ST_WALKING) k->animActual = walk;
+    else if (k->estado == ST_JUMPING) k->animActual = jump;
+    else if (k->estado == ST_EATING) k->animActual = eat;
+    else if (k->estado == ST_SPITTING) k->animActual = spit;
+    else if (k->estado == ST_FAT_IDLE) k->animActual = fat_idle;
+    else if (k->estado == ST_FAT_WALKING) k->animActual = fat_walk;
+    else if (k->estado == ST_FAT_FLYING) {
+        // Si la velocidad es positiva, está cayendo
+        if (k->velY > 10.0f) {
+            k->animActual = fat_fall; 
+        } else {
+            k->animActual = fly;
+        }
     }
 }

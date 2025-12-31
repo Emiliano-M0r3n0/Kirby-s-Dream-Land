@@ -25,6 +25,7 @@
 #define ST_FAT_IDLE      4
 #define ST_FAT_FLYING    5
 #define ST_SPITTING      6
+#define ST_FAT_WALKING   7
 
 #define SPEED_X 400.0f
 #define SALTO_FUERZA 450.0f
@@ -131,11 +132,29 @@ Imagen* animacion_actual(Animacion *anim);
 /// @param anim Estructura en la que se guardara
 void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim); 
 
-
+/// @brief Inicializa una variable de tipo kirby, inicia su animacion en estado quieto y en las posiciones indicadas
+/// @param k Dirección de la variable tipo Kirby
+/// @param x Posición inicial donde quieres que aparezca
+/// @param y Posicion inicial donde quieres que aparezca
 void ini_kirby(Kirby *k, float x, float y);
 
+/// @brief Actualiza las fisicas y el estado de kirby en base a las lecturas del esp
+/// @param k Direccion de la variable tipo Kirby
+/// @param input Direccion de la variable tipo lectura que almacena las lecturas del esp
+/// @param dt Variable para ajustar los FPS
+/// @param anchoVentana Ancho de la ventana (necesaria para los limites)
+/// @param altoVentana Alto de la ventana (necesaria para los limites)
 void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int altoVentana);
 
+/// @brief En base al estado de kirby selecciona la animación que tiene que ser plasmada
+/// @param k Direccion de la variable tipo Kirby
+/// @param idle Animacion en estado quieto
+/// @param walk Animacion caminando
+/// @param jump Animacion saltando
+/// @param eat Animacion comiendo
+/// @param fat_idle Animacion gordito en estaado quieto
+/// @param fly Animacion volando
+/// @param spit Animacion escupiendo
 void seleccionar_animacion_kirby(Kirby *k, Animacion *idle, Animacion *walk, Animacion *jump, 
-    Animacion *eat, Animacion *fat_idle, Animacion *fly, Animacion *spit); 
+    Animacion *eat, Animacion *fat_idle, Animacion *fat_walk, Animacion *fly, Animacion *fat_fall, Animacion *spit); 
 #endif

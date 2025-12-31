@@ -96,15 +96,6 @@
 #define BUTTON_ACTION 25
 #define BUTTON_DOWN 27
 
-//Constantes
-#define SPEED_X 400.0f
-#define SALTO_FUERZA 450.0f
-#define FLY_SPEED 600.0f
-#define TIEMPO_COMER 15.0f
-#define TIEMPO_ESCUPIR 7.5f
-#define GRAVEDAD 1200.0f
-#define DT (1.0f / 60.0f)
-
 int main()
 {
     //Elementos para imagenes
@@ -143,25 +134,21 @@ int main()
     };
 
     const char* kirbyfat_walk_r[] = {
-        "Kirby/Kirby16.bmp",
         "Kirby/Kirby17.bmp",
         "Kirby/Kirby18.bmp"
     };
 
     const char* kirbyfat_walk_r_mask[] = {
-        "Kirby/Kirby16mask.bmp",
         "Kirby/Kirby17mask.bmp",
         "Kirby/Kirby18mask.bmp"
     };
 
     const char* kirbyfatair_walk_r[] = {
-        "Kirby/Kirby19.bmp",
         "Kirby/Kirby14.bmp",
         "Kirby/Kirby15.bmp"
     };
 
     const char* kirbyfatair_walk_r_mask[] = {
-        "Kirby/Kirby19mask.bmp",
         "Kirby/Kirby14mask.bmp",
         "Kirby/Kirby15mask.bmp"
     };
@@ -197,6 +184,26 @@ int main()
         "Kirby/Kirby2mask.bmp",
         "Kirby/Kirby2mask.bmp"
     };
+
+    const char* kirbyfat_jump_r[] = {
+        "Kirby/Kirby19.bmp",
+        "Kirby/Kirby19.bmp"
+    };
+
+    const char* kirbyfat_jump_r_mask[] = {
+        "Kirby/Kirby19mask.bmp",
+        "Kirby/Kirby19mask.bmp"
+    };
+
+    const char* kirbyfat_idle_r[] = {
+        "Kirby/Kirby16.bmp",
+        "Kirby/Kirby16.bmp"
+    };
+
+    const char* kirbyfat_idle_r_mask[] = {
+        "Kirby/Kirby16mask.bmp",
+        "Kirby/Kirby16mask.bmp"
+    };
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
@@ -214,16 +221,20 @@ int main()
     //Animacion de salto/caida e idle estas son especiales ya que solo son un frame
     Animacion animkirbyidle;
     Animacion animkirbyjump;
+    Animacion animkirbyfatidle;
+    Animacion animkirbyfatjump;
 
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
-    cargar_animacion(kirby_idle_r,kirby_idle_r_mask,2,0,&animkirbyidle);
-    cargar_animacion(kirby_jump_r,kirby_jump_r_mask,2,0,&animkirbyjump);
-    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,0,&animkirby_caminando_r);
-    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,0,&animkirby_comiendo_r);
-    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,3,0,&animkirbyfat_caminando_r);
-    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,3,0,&animkirbyfatair_caminando_r);
-    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,0,&animkirby_escupiendo_r);
+    cargar_animacion(kirbyfat_jump_r,kirbyfat_jump_r_mask,2,2,&animkirbyfatjump);
+    cargar_animacion(kirby_idle_r,kirby_idle_r_mask,2,2,&animkirbyidle);
+    cargar_animacion(kirby_jump_r,kirby_jump_r_mask,2,2,&animkirbyjump);
+    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,2,&animkirby_caminando_r);
+    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,2,&animkirby_comiendo_r);
+    cargar_animacion(kirbyfat_idle_r,kirby_idle_r_mask,2,2,&animkirbyfatidle);
+    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,2,2,&animkirbyfat_caminando_r);
+    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,2,2,&animkirbyfatair_caminando_r);
+    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,2,&animkirby_escupiendo_r);
 
     //Configuraciones y calibraciones del Esp32
     Board *esp32 = connectDevice("COM6",B115200);
@@ -269,8 +280,8 @@ while (1)
     actualizar_kirby(&kirby,&lectura_general,DT,ventana.anchoVentana(),ventana.altoVentana());
 
     seleccionar_animacion_kirby(&kirby,&animkirbyidle,&animkirby_caminando_r,&animkirbyjump,
-                                &animkirby_comiendo_r,&animkirbyfat_caminando_r,
-                                &animkirbyfatair_caminando_r,&animkirby_escupiendo_r);
+                                &animkirby_comiendo_r,&animkirbyfatidle,&animkirbyfat_caminando_r,
+                                &animkirbyfatair_caminando_r,&animkirbyfatjump,&animkirby_escupiendo_r);
 
     sprite = animacion_actual(kirby.animActual);
 
