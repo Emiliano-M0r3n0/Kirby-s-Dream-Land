@@ -25,6 +25,8 @@
 **/
 
 #include <stdio.h>
+#include <stdint.h>
+#include <time.h>
 #include "simplecontroller.h"
 #include "serial.h"
 
@@ -113,30 +115,47 @@ void analogWrite(Board *self, uint8_t pin, float value)
 
 bool digitalRead(Board *self, uint8_t pin)
 {
-
     self->command[0] = DIGITAL_READ;
     self->command[1] = pin;
     self->command[2] = 0;
     self->command[3] = 0;
+    
     writeSerialPort(self->command, 4, &self->sp);
-    readSerialPort(&self->byte, 1, &self->sp);
-    if (!self->byte)
-    {
-        return false;
-    }
-    if (self->byte == DIGITAL_READ)
-    {
-        readSerialPort(&self->byte, 1, &self->sp);
-        if (self->byte == pin)
-        {
-            uint val;
-            readSerialPort(&self->byte, 1, &self->sp);
-            val = (uint)(self->byte) << 8;
-            readSerialPort(&self->byte, 1, &self->sp);
-            val += (uint)self->byte;
-            return val;
+    
+    // ESPERAR SIN SLEEP O CON SLEEP MUY CORTO
+    uint8_t response[4];
+    int bytesRead = 0;
+    clock_t start_time = clock();
+    
+    // Timeout de solo 10ms máximo
+    while((clock() - start_time) * 1000 / CLOCKS_PER_SEC < 10 && bytesRead < 4) {
+        int n = readSerialPort(response + bytesRead, 4 - bytesRead, &self->sp);
+        if(n > 0) {
+            bytesRead += n;
+            // Sincronización rápida si es necesario
+            if(bytesRead >= 1 && response[0] != DIGITAL_READ) {
+                // Buscar comando correcto en el buffer
+                for(int i = 1; i < bytesRead; i++) {
+                    if(response[i] == DIGITAL_READ) {
+                        // Realinear buffer
+                        for(int j = 0; j < bytesRead - i; j++) {
+                            response[j] = response[i + j];
+                        }
+                        bytesRead = bytesRead - i;
+                        break;
+                    }
+                }
+            }
         }
     }
+    
+    if(bytesRead == 4 && response[0] == DIGITAL_READ && response[1] == pin) {
+        uint16_t val = (response[2] << 8) | response[3];
+        // PARA INPUT_PULLUP: 0 = presionado, 1 = no presionado
+        // Así que invertimos para tener lógica normal
+        return (val == 0);
+    }
+    
     return false;
 }
 
@@ -146,31 +165,34 @@ float analogRead(Board *self, uint8_t pin)
     self->command[1] = pin;
     self->command[2] = 0;
     self->command[3] = 0;
+    
+    // LIMPIAR BUFFER ANTES DE ESCRIBIR
+    unsigned char dummy;
+    while(readSerialPort(&dummy, 1, &self->sp) > 0) {} // Descarta datos pendientes
+    
     writeSerialPort(self->command, 4, &self->sp);
-    readSerialPort(&self->byte, 1, &self->sp);
-    if (!self->byte)
-    {
-        return 0.0f;
+    
+    // Esperar respuesta con timeout
+    int attempts = 0;
+    uint8_t response[4];
+    int bytesRead = 0;
+    
+    while(attempts < 100 && bytesRead < 4) { // Timeout de ~100ms
+        Sleep(1);
+        int n = readSerialPort(response + bytesRead, 4 - bytesRead, &self->sp);
+        if(n > 0) bytesRead += n;
+        attempts++;
     }
-    if (self->byte == ANALOG_READ)
-    {
-        readSerialPort(&self->byte, 1, &self->sp);
-        if (self->byte == pin)
-        {
-            uint val;
-            float fval;
-            readSerialPort(&self->byte, 1, &self->sp);
-            val = (uint)(self->byte) << 8;
-            readSerialPort(&self->byte, 1, &self->sp);
-            val += (uint)self->byte;
-
-            if (self->_device == ARDUINO)
-                fval = (float)val / 1023.0f;
-            else
-                fval = (float)val / 4095.0f;
-            return fval;
-        }
+    
+    if(bytesRead == 4 && response[0] == ANALOG_READ && response[1] == pin) {
+        uint16_t val = (response[2] << 8) | response[3];
+        return (self->_device == ARDUINO) ? (float)val / 1023.0f : (float)val / 4095.0f;
     }
+    
+    // Si falla, limpiar buffer y retornar valor por defecto
+    unsigned char cleanup;
+    while(readSerialPort(&cleanup, 1, &self->sp) > 0) {}
+    
     return 0.0f;
 }
 

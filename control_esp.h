@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Definicion de estados de Kirby
 #define ST_IDLE          0
 #define ST_WALKING       1
 #define ST_JUMPING       2
@@ -27,6 +28,19 @@
 #define ST_SPITTING      6
 #define ST_FAT_WALKING   7
 
+// Definicion de animaciones de Kirby
+#define AN_IDLE       0
+#define AN_WALK       1
+#define AN_JUMP       2
+#define AN_EAT        3
+#define AN_FAT_IDLE   4
+#define AN_FAT_WALK   5
+#define AN_FLY        6
+#define AN_FAT_FALL   7
+#define AN_SPIT       8
+#define AN_COUNT      9 //Numero total de animaciones
+
+// Defincion de constantes
 #define SPEED_X 400.0f
 #define SALTO_FUERZA 450.0f
 #define GRAVEDAD 1200.0f
@@ -41,20 +55,27 @@ typedef struct EjeJoystick{
 
 }EjeJoystick;
 
+typedef struct Boton {
+    Board *board;
+    uint8_t pin;
+    bool actual;
+    bool previo;
+}Boton;
+
 /// @brief Estructura utilizada para encapsular las lecturas de los botones y del joystick
 typedef struct Lectura{
 
     Board *board;
     float lensX; //Se guarda el resultado de la funcion leer_joystick
 
-    bool lens_action;
-    bool lens_jump;
-    bool lens_down;
+    Boton button_action;
+    Boton button_jump;
+    Boton button_down;
 
-    uint8_t pin_action;
-    uint8_t pin_jump;
     uint8_t pin_down;
     uint8_t pin_mtr;
+
+    bool mtr_on;
 
 }Lectura;
 
@@ -65,7 +86,9 @@ typedef struct Animacion{
     int total_frames; //Numero total de frames
     int frame_actual; //Nos indica en que frame nos encontramos
     int delay_frames; //Delay entre cada frame
-    int contador; 
+    int contador;
+    
+    bool bucle;
 
 } Animacion;
 
@@ -80,11 +103,10 @@ typedef struct Kirby {
     //Variables que guardan el pulso (flancos)
     bool jump_p;
     bool action_p;
-    //Memoria de que boton fue presionado
-    bool jump_prev;
-    bool action_prev;
-    // Punteros a las animaciones 
+    // Puntero a la animacion actual 
     Animacion *animActual;
+    //Arreglo en el que se encuentran todas las animaciones
+    Animacion arregloAnim[AN_COUNT];
     
 } Kirby;
 
@@ -93,6 +115,8 @@ typedef struct Kirby {
 /// @param board Placa a la cual esta vinculada
 /// @param pin Pin al que esta conectado el eje del joystick
 void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin);
+
+bool fue_presionado(Boton *button,Board *board);
 
 /// @brief Inicia la calibracion, hace un promedio de lecturas para obtener el offset
 /// @param Eje Direccion del Eje que calibraremos
@@ -119,6 +143,8 @@ void ini_lens(Lectura *lens,Board *board,uint8_t pin_action, uint8_t pin_jump, u
 /// @param terminal (true) en caso de querer ver una terminal con los valores que leemos
 void leer_entrada(Lectura *lens,EjeJoystick *EjeX,bool terminal);
 
+void reiniciar_animacion(Animacion *anim);
+
 /// @brief Selecciona un frame del arreglo y lo devuelve generando la animacion
 /// @param anim Animacion deseada
 /// @return Frame del arreglo
@@ -136,6 +162,7 @@ void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_
 /// @param k Dirección de la variable tipo Kirby
 /// @param x Posición inicial donde quieres que aparezca
 /// @param y Posicion inicial donde quieres que aparezca
+/// @param arregloAnim Direccion del arreglo que alberga todas las animaciones
 void ini_kirby(Kirby *k, float x, float y);
 
 /// @brief Actualiza las fisicas y el estado de kirby en base a las lecturas del esp
@@ -155,6 +182,5 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 /// @param fat_idle Animacion gordito en estaado quieto
 /// @param fly Animacion volando
 /// @param spit Animacion escupiendo
-void seleccionar_animacion_kirby(Kirby *k, Animacion *idle, Animacion *walk, Animacion *jump, 
-    Animacion *eat, Animacion *fat_idle, Animacion *fat_walk, Animacion *fly, Animacion *fat_fall, Animacion *spit); 
+void seleccionar_animacion_kirby(Kirby *k); 
 #endif

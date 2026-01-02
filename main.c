@@ -18,76 +18,6 @@
 #include <stdbool.h>
 #include <math.h>
 
-//RUTAS PARA LOS SPRITES DE KIRBY
-#define RUTA_KIRBY "Kirby/Kirby.bmp"
-#define RUTA_KIRBYMASK "Kirby/Kirbymask.bmp"
-
-#define RUTA_KIRBY2 "Kirby/Kirby2.bmp"
-#define RUTA_KIRBY2MASK "Kirby/Kirby2mask.bmp"
-
-#define RUTA_KIRBY3 "Kirby/Kirby3.bmp"
-#define RUTA_KIRBY3MASK "Kirby/Kirby3mask.bmp"
-
-#define RUTA_KIRBY4 "Kirby/Kirby4.bmp"
-#define RUTA_KIRBY4MASK "Kirby/Kirby4mask.bmp"
-
-#define RUTA_KIRBY5 "Kirby/Kirby5.bmp"
-#define RUTA_KIRBY5MASK "Kirby/Kirby5mask.bmp"
-
-#define RUTA_KIRBY6 "Kirby/Kirby6.bmp"
-#define RUTA_KIRBY6MASK "Kirby/Kirby6mask.bmp"
-
-#define RUTA_KIRBY7 "Kirby/Kirby7.bmp"
-#define RUTA_KIRBY7MASK "Kirby/Kirby7mask.bmp"
-
-#define RUTA_KIRBY8 "Kirby/Kirby8.bmp"
-#define RUTA_KIRBY8MASK "Kirby/Kirby8mask.bmp"
-
-#define RUTA_KIRBY9 "Kirby/Kirby9.bmp"
-#define RUTA_KIRBY9MASK "Kirby/Kirby9mask.bmp"
-
-#define RUTA_KIRBY11 "Kirby/Kirby11.bmp"
-#define RUTA_KIRBY11MASK "Kirby/Kirby11mask.bmp"
-
-#define RUTA_KIRBY12 "Kirby/Kirby12.bmp"
-#define RUTA_KIRBY12MASK "Kirby/Kirby12mask.bmp"
-
-#define RUTA_KIRBY13 "Kirby/Kirby13.bmp"
-#define RUTA_KIRBY13MASK "Kirby/Kirby13mask.bmp"
-
-#define RUTA_KIRBY14 "Kirby/Kirby14.bmp"
-#define RUTA_KIRBY14MASK "Kirby/Kirby14mask.bmp"
-
-#define RUTA_KIRBY15 "Kirby/Kirby15.bmp"
-#define RUTA_KIRBY15MASK "Kirby/Kirby15mask.bmp"
-
-#define RUTA_KIRBY16 "Kirby/Kirby16.bmp"
-#define RUTA_KIRBY16MASK "Kirby/Kirby16mask.bmp"
-
-#define RUTA_KIRBY17 "Kirby/Kirby17.bmp"
-#define RUTA_KIRBY17MASK "Kirby/Kirby17mask.bmp"
-
-#define RUTA_KIRBY18 "Kirby/Kirby18.bmp"
-#define RUTA_KIRBY18MASK "Kirby/Kirby18mask.bmp"
-
-#define RUTA_KIRBY19 "Kirby/Kirby19.bmp"
-#define RUTA_KIRBY19MASK "Kirby/Kirby19mask.bmp"
-
-#define RUTA_KIRBY20 "Kirby/Kirby20.bmp"
-#define RUTA_KIRBY20MASK "Kirby/Kirby20mask.bmp"
-
-#define RUTA_KIRBY21 "Kirby/Kirby21.bmp"
-#define RUTA_KIRBY21MASK "Kirby/Kirby21mask.bmp"
-
-#define RUTA_KIRBY22 "Kirby/Kirby22.bmp"
-#define RUTA_KIRBY22MASK "Kirby/Kirby22mask.bmp"
-
-#define RUTA_KIRBY23 "Kirby/Kirby23.bmp"
-#define RUTA_KIRBY23MASK "Kirby/Kirby23mask.bmp"
-
-#define RUTA_NUBE "Kirby/Nube.bmp"
-#define RUTA_NUBEMASK "Kirby/Nubemask.bmp"
-
 //Pines para el ESP32
 #define JX 35
 #define JY 34
@@ -101,6 +31,16 @@ int main()
     //Elementos para imagenes
     const int ESCALA = 65;
     const int DELAY = 50;
+
+    const char *bronto_walk[] = {
+        "Enemigos/Bronto.bmp",
+        "Enemigos/Bronto2.bmp"
+    }; 
+
+    const char *bronto_walk_mask[] = {
+        "Enemigos/Brontomask.bmp",
+        "Enemigos/Bronto2mask.bmp"        
+    };
 
     //Arreglos de rutas
     const char *kirby_walk_r[] = {
@@ -208,36 +148,48 @@ int main()
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
 
-    Imagen *kirbyidle = ventana.creaImagenConMascara(RUTA_KIRBY,RUTA_KIRBYMASK);
-    Imagen *kirbyjump = ventana.creaImagenConMascara(RUTA_KIRBY2,RUTA_KIRBY2MASK);
-
-    //Creacion de las animaciones
-    Animacion animkirby_caminando_r;
-    Animacion animkirby_comiendo_r;
-    Animacion animkirbyfat_caminando_r;
-    Animacion animkirbyfatair_caminando_r;
-    Animacion animkirby_escupiendo_r;
-
-    //Animacion de salto/caida e idle estas son especiales ya que solo son un frame
-    Animacion animkirbyidle;
-    Animacion animkirbyjump;
-    Animacion animkirbyfatidle;
-    Animacion animkirbyfatjump;
+    //Animaciones de los enemigos
+    Animacion enemianimbronto_l;
 
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
-    cargar_animacion(kirbyfat_jump_r,kirbyfat_jump_r_mask,2,2,&animkirbyfatjump);
-    cargar_animacion(kirby_idle_r,kirby_idle_r_mask,2,2,&animkirbyidle);
-    cargar_animacion(kirby_jump_r,kirby_jump_r_mask,2,2,&animkirbyjump);
-    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,2,&animkirby_caminando_r);
-    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,2,&animkirby_comiendo_r);
-    cargar_animacion(kirbyfat_idle_r,kirby_idle_r_mask,2,2,&animkirbyfatidle);
-    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,2,2,&animkirbyfat_caminando_r);
-    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,2,2,&animkirbyfatair_caminando_r);
-    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,2,&animkirby_escupiendo_r);
+    Kirby kirby;
+
+    //Sprites de Kirby
+    cargar_animacion(kirbyfat_jump_r,kirbyfat_jump_r_mask,2,2,&kirby.arregloAnim[AN_FAT_FALL]);
+    kirby.arregloAnim[AN_FAT_FALL].bucle = true; //True se repite la animacion, false no
+
+    cargar_animacion(kirby_idle_r,kirby_idle_r_mask,2,2,&kirby.arregloAnim[AN_IDLE]);
+    kirby.arregloAnim[AN_IDLE].bucle = true;
+
+    cargar_animacion(kirby_jump_r,kirby_jump_r_mask,2,2,&kirby.arregloAnim[AN_JUMP]);
+    kirby.arregloAnim[AN_JUMP].bucle = true;
+
+    cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,3,&kirby.arregloAnim[AN_WALK]);
+    kirby.arregloAnim[AN_WALK].bucle = true;
+
+    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,7,&kirby.arregloAnim[AN_EAT]);
+    kirby.arregloAnim[AN_EAT].bucle = false;
+
+    cargar_animacion(kirbyfat_idle_r,kirby_idle_r_mask,2,2,&kirby.arregloAnim[AN_FAT_IDLE]);
+    kirby.arregloAnim[AN_FAT_IDLE].bucle = true;
+
+    cargar_animacion(kirbyfat_walk_r,kirbyfat_walk_r_mask,2,2,&kirby.arregloAnim[AN_FAT_WALK]);
+    kirby.arregloAnim[AN_FAT_WALK].bucle = true;
+
+    cargar_animacion(kirbyfatair_walk_r,kirbyfatair_walk_r_mask,2,7,&kirby.arregloAnim[AN_FLY]);
+    kirby.arregloAnim[AN_FLY].bucle = false;
+
+    cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,8,&kirby.arregloAnim[AN_SPIT]);
+    kirby.arregloAnim[AN_SPIT].bucle = false;
+
+    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);    
+
+    //Sprites de Enemigos
+    cargar_animacion(bronto_walk,bronto_walk_mask,2,2,&enemianimbronto_l);
 
     //Configuraciones y calibraciones del Esp32
-    Board *esp32 = connectDevice("COM6",B115200);
+    Board *esp32 = connectDevice("COM6",B230400);
     esp32->pinMode(esp32,JX,INPUT);
     esp32->pinMode(esp32,JY,INPUT);
     esp32->pinMode(esp32,MTR,OUTPUT);
@@ -255,7 +207,6 @@ int main()
 
     ini_lens(&lectura_general,esp32,BUTTON_ACTION,BUTTON_JUMP,BUTTON_DOWN,MTR);
 
-    int tecla = ventana.teclaPresionada();
     ventana.colorFondo(COLORES.NEGRO);
     ventana.limpiaVentana();
     ventana.actualizaVentana();
@@ -266,22 +217,25 @@ int main()
 
     Animacion *anim_act;
 
-    Kirby kirby;
-    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);
-
 while (1)
 {
-    /* ================== 1. LECTURA DE ENTRADAS ================== */
-    leer_entrada(&lectura_general, &EjeX, false);
+    static bool last_mtr = false;
 
-    //lectura_general.lens_jump = true;
-    //lectura_general.lens_action = true;
+    leer_entrada(&lectura_general, &EjeX, true);
+
+    kirby.action_p = fue_presionado(&lectura_general.button_action,lectura_general.board);
+
+    kirby.jump_p = fue_presionado(&lectura_general.button_jump,lectura_general.board);
 
     actualizar_kirby(&kirby,&lectura_general,DT,ventana.anchoVentana(),ventana.altoVentana());
 
-    seleccionar_animacion_kirby(&kirby,&animkirbyidle,&animkirby_caminando_r,&animkirbyjump,
-                                &animkirby_comiendo_r,&animkirbyfatidle,&animkirbyfat_caminando_r,
-                                &animkirbyfatair_caminando_r,&animkirbyfatjump,&animkirby_escupiendo_r);
+    if (lectura_general.mtr_on != last_mtr) 
+    {
+    lectura_general.board->digitalWrite(lectura_general.board,lectura_general.pin_mtr,lectura_general.mtr_on);
+    last_mtr = lectura_general.mtr_on;
+    }
+
+    seleccionar_animacion_kirby(&kirby);
 
     sprite = animacion_actual(kirby.animActual);
 

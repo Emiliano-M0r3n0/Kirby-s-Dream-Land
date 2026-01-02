@@ -10,12 +10,21 @@ simplecontroller.o: simplecontroller.c \
  C:/Strawberry/c/x86_64-w64-mingw32/include/_mingw_off_t.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/swprintf.inl \
  C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
+ C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stdint.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/stdint.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/crtdefs.h \
+ C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stddef.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/stddef.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/time.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/sys/timeb.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/sys/timeb_s.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/_timeval.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/pthread_time.h \
  simplecontroller.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stdbool.h \
  serial.h C:/Strawberry/c/x86_64-w64-mingw32/include/windows.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/sdkddkver.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/excpt.h \
- C:/Strawberry/c/x86_64-w64-mingw32/include/crtdefs.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stdarg.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/stdarg.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/_mingw_stdarg.h \
@@ -38,8 +47,6 @@ simplecontroller.o: simplecontroller.c \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/x86intrin.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/x86gprintrin.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/ia32intrin.h \
- C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stddef.h \
- C:/Strawberry/c/x86_64-w64-mingw32/include/stddef.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/adxintrin.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/bmiintrin.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/bmi2intrin.h \
@@ -225,7 +232,6 @@ simplecontroller.o: simplecontroller.c \
  C:/Strawberry/c/x86_64-w64-mingw32/include/shellapi.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/winperf.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/winsock.h \
- C:/Strawberry/c/x86_64-w64-mingw32/include/_timeval.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/_bsd_types.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/inaddr.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/psdk_inc/_socket_types.h \
