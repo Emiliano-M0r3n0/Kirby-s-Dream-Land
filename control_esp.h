@@ -27,6 +27,7 @@
 #define ST_FAT_FLYING    5
 #define ST_SPITTING      6
 #define ST_FAT_WALKING   7
+#define ST_INHALE        8
 
 // Definicion de animaciones de Kirby
 #define AN_IDLE       0
@@ -38,7 +39,8 @@
 #define AN_FLY        6
 #define AN_FAT_FALL   7
 #define AN_SPIT       8
-#define AN_COUNT      9 //Numero total de animaciones
+#define AN_INHALE     9
+#define AN_COUNT      10 //Numero total de animaciones
 
 // Defincion de constantes
 #define SPEED_X 400.0f
@@ -107,6 +109,8 @@ typedef struct Kirby {
     Animacion *animActual;
     //Arreglo en el que se encuentran todas las animaciones
     Animacion arregloAnim[AN_COUNT];
+
+    Animacion arregloAnimMirror[AN_COUNT];
     
 } Kirby;
 

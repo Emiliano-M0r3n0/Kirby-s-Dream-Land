@@ -210,7 +210,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 void seleccionar_animacion_kirby(Kirby *k)
 {
     int indice = AN_IDLE;
-if (k->estado == ST_IDLE) indice = AN_IDLE;
+    if (k->estado == ST_IDLE) indice = AN_IDLE;
     else if (k->estado == ST_WALKING) indice = AN_WALK;
     else if (k->estado == ST_JUMPING) indice = AN_JUMP;
     else if (k->estado == ST_EATING) indice = AN_EAT;
@@ -220,9 +220,20 @@ if (k->estado == ST_IDLE) indice = AN_IDLE;
     else if (k->estado == ST_FAT_FLYING) {
         indice = (k->velY > 10.0f) ? AN_FAT_FALL : AN_FLY;
     }
+if(k->mirandoDerecha == true)
+{
 if (k->animActual != &k->arregloAnim[indice]) {
         k->animActual = &k->arregloAnim[indice];
         k->animActual->frame_actual = 0;
         k->animActual->contador = 0;
     }
+}
+else if(k->mirandoDerecha == false)
+{
+if (k->animActual != &k->arregloAnimMirror[indice]) {
+        k->animActual = &k->arregloAnimMirror[indice];
+        k->animActual->frame_actual = 0;
+        k->animActual->contador = 0;
+    }
+}
 }

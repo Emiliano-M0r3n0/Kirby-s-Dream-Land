@@ -42,7 +42,73 @@ int main()
         "Enemigos/Bronto2mask.bmp"        
     };
 
-    //Arreglos de rutas
+    const char *cappy_walk[] = {
+        "Enemigos/Cappy.bmp",
+        "Enemigos/Cappy2.bmp",
+        "Enemigos/Cappy3.bmp"
+    };
+
+    const char *cappy_walk_mask[] = {
+        "Enemigos/Cappymask.bmp",
+        "Enemigos/Cappy2mask.bmp",
+        "Enemigos/Cappy3mask.bmp"
+    };
+
+    const char *grizzo[] = {
+        "Enemigos/Grizzo.bmp",
+        "Enemigos/Grizzo2.bmp"
+    };
+
+    const char *grizzo_mask[] = {
+        "Enemigos/Grizzomask.bmp",
+        "Enemigos/Grizzo2mask.bmp"
+    };
+
+    const char* manzana[] = {
+        "Enemigos/Manzana.bmp",
+        "Enemigos/Manzana2.bmp",
+        "Enemigos/Manzana3.bmp",
+        "Enemigos/Manzana4.bmp"
+    };
+
+    const char* manzana_mask[] = {
+        "Enemigos/Manzanamask.bmp",
+        "Enemigos/Manzana2mask.bmp",
+        "Enemigos/Manzana3mask.bmp",
+        "Enemigos/Manzana4mask.bmp"
+    };
+
+    const char* poppybros[] = {
+        "Enemigos/Poppybros.bmp",
+        "Enemigos/Poppybros2.bmp"
+    };
+
+    const char* poppybros_mask[] = {
+        "Enemigos/Poppybrosmask.bmp",
+        "Enemigos/Poppybros2mask.bmp"
+    };
+
+    const char* twizzy[] = {
+        "Enemigos/Twizzy.bmp",
+        "Enemigos/Twizzy2.bmp"
+    };
+
+    const char* twizzy_mask[] = {
+        "Enemigos/Twizzymask.bmp",
+        "Enemigos/Twizzy2mask.bmp"
+    };
+
+    const char* wadledee[] = {
+        "Enemigos/WadleDee.bmp",
+        "Enemigos/WadleDee2.bmp"
+    };
+
+    const char* wadledee_mask[] = {
+        "Enemigos/WadleDeemask.bmp",
+        "Enemigos/WadleDee2mask.bmp"
+    };
+
+    //Arreglos de rutas de Kirby
     const char *kirby_walk_r[] = {
         "Kirby/Kirby4.bmp",
         "Kirby/Kirby24.bmp",
@@ -58,19 +124,25 @@ int main()
     };
 
     const char *kirby_eat_r[] = {
-        "Kirby/Kirby7.bmp",
-        "Kirby/Kirby8.bmp",
         "Kirby/Kirby23.bmp",
         "Kirby/Kirby22.bmp",
         "Kirby/Kirby19.bmp"
     };
 
     const char *kirby_eat_r_mask[] = {
-        "Kirby/Kirby7mask.bmp",
-        "Kirby/Kirby8mask.bmp",
         "Kirby/Kirby23mask.bmp",
         "Kirby/Kirby22mask.bmp",
         "Kirby/Kirby19mask.bmp" 
+    };
+
+    const char *kirby_inhale_r[] = {
+        "Kirby/Kirby7.bmp",
+        "Kirby/Kirby8.bmp"
+    };
+
+        const char *kirby_inhale_r_mask[] = {
+        "Kirby/Kirby7mask.bmp",
+        "Kirby/Kirby8mask.bmp"
     };
 
     const char* kirbyfat_walk_r[] = {
@@ -144,6 +216,140 @@ int main()
         "Kirby/Kirby16mask.bmp",
         "Kirby/Kirby16mask.bmp"
     };
+
+    const char* humo_r[] = {
+        "Kirby/Nube.bmp",
+        "Kirby/Nube.bmp"
+    };
+
+    const char* humo_r_mask[] = {
+        "Kirby/Nubemask.bmp",
+        "Kirby/Nubemask.bmp"
+    };
+
+    const char* estrella[] = {
+        "Kirby/Estrellita.bmp",
+        "Kirby/Estrella2.bmp",
+        "Kirby/Estrella.bmp"
+    };
+
+    const char* estrella_mask[] = {
+        "Kirby/Estrellitamask.bmp",
+        "Kirby/Estrella2mask.bmp",
+        "Kirby/Estrellamask.bmp"
+    };
+
+    //-----------------------------------------Arreglos de rutas de Kirby en espejo---------------------------------------------------------
+
+        const char *kirby_walk_r_mirror[] = {
+        "Kirbymirror/Kirby4.bmp",
+        "Kirbymirror/Kirby24.bmp",
+        "Kirbymirror/Kirby5.bmp",
+        "Kirbymirror/Kirby6.bmp"
+    };
+
+    const char *kirby_walk_r_mask_mirror[] = {
+        "Kirbymirror/Kirby4mask.bmp",
+        "Kirbymirror/Kirby24mask.bmp",
+        "Kirbymirror/Kirby5mask.bmp",
+        "Kirbymirror/Kirby6mask.bmp"
+    };
+
+    const char *kirby_eat_r_mirror[] = {
+        "Kirbymirror/Kirby23.bmp",
+        "Kirbymirror/Kirby22.bmp",
+        "Kirbymirror/Kirby19.bmp"
+    };
+
+    const char *kirby_eat_r_mask_mirror[] = {
+        "Kirbymirror/Kirby23mask.bmp",
+        "Kirbymirror/Kirby22mask.bmp",
+        "Kirbymirror/Kirby19mask.bmp" 
+    };
+
+    const char *kirby_inhale_r_mirror[] = {
+        "Kirbymirror/Kirby7.bmp",
+        "Kirbymirror/Kirby8.bmp",
+    };
+
+        const char *kirby_inhale_r_mask_mirror[] = {
+        "Kirbymirror/Kirby7mask.bmp",
+        "Kirbymirror/Kirby8mask.bmp",
+    };
+
+    const char* kirbyfat_walk_r_mirror[] = {
+        "Kirbymirror/Kirby17.bmp",
+        "Kirbymirror/Kirby18.bmp"
+    };
+
+    const char* kirbyfat_walk_r_mask_mirror[] = {
+        "Kirbymirror/Kirby17mask.bmp",
+        "Kirbymirror/Kirby18mask.bmp"
+    };
+
+    const char* kirbyfatair_walk_r_mirror[] = {
+        "Kirbymirror/Kirby14.bmp",
+        "Kirbymirror/Kirby15.bmp"
+    };
+
+    const char* kirbyfatair_walk_r_mask_mirror[] = {
+        "Kirbymirror/Kirby14mask.bmp",
+        "Kirbymirror/Kirby15mask.bmp"
+    };
+
+    const char* kirby_spit_r_mirror[] = {
+        "Kirbymirror/Kirby13.bmp",
+        "Kirbymirror/Kirby8.bmp",
+        "Kirbymirror/Kirby7.bmp"
+    };
+
+    const char* kirby_spit_r_mask_mirror[] = {
+        "Kirbymirror/Kirby13mask.bmp",
+        "Kirbymirror/Kirby8mask.bmp",
+        "Kirbymirror/Kirby7mask.bmp"
+    };
+
+    const char* kirby_idle_r_mirror[] = {
+        "Kirbymirror/Kirby.bmp",
+        "Kirbymirror/Kirby.bmp"
+    };
+
+    const char* kirby_idle_r_mask_mirror[] = {
+        "Kirbymirror/Kirbymask.bmp",
+        "Kirbymirror/Kirbymask.bmp"
+    };
+
+    const char* kirby_jump_r_mirror[] = {
+        "Kirbymirror/Kirby2.bmp",
+        "Kirbymirror/Kirby2.bmp"
+    };
+
+    const char* kirby_jump_r_mask_mirror[] = {
+        "Kirbymirror/Kirby2mask.bmp",
+        "Kirbymirror/Kirby2mask.bmp"
+    };
+
+    const char* kirbyfat_jump_r_mirror[] = {
+        "Kirbymirror/Kirby19.bmp",
+        "Kirbymirror/Kirby19.bmp"
+    };
+
+    const char* kirbyfat_jump_r_mask_mirror[] = {
+        "Kirbymirror/Kirby19mask.bmp",
+        "Kirbymirror/Kirby19mask.bmp"
+    };
+
+    const char* kirbyfat_idle_r_mirror[] = {
+        "Kirbymirror/Kirby16.bmp",
+        "Kirbymirror/Kirby16.bmp"
+    };
+
+    const char* kirbyfat_idle_r_mask_mirror[] = {
+        "Kirbymirror/Kirby16mask.bmp",
+        "Kirbymirror/Kirby16mask.bmp"
+    };
+
+
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
@@ -168,7 +374,7 @@ int main()
     cargar_animacion(kirby_walk_r,kirby_walk_r_mask,4,3,&kirby.arregloAnim[AN_WALK]);
     kirby.arregloAnim[AN_WALK].bucle = true;
 
-    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,5,7,&kirby.arregloAnim[AN_EAT]);
+    cargar_animacion(kirby_eat_r,kirby_eat_r_mask,3,5,&kirby.arregloAnim[AN_EAT]);
     kirby.arregloAnim[AN_EAT].bucle = false;
 
     cargar_animacion(kirbyfat_idle_r,kirby_idle_r_mask,2,2,&kirby.arregloAnim[AN_FAT_IDLE]);
@@ -182,6 +388,40 @@ int main()
 
     cargar_animacion(kirby_spit_r,kirby_spit_r_mask,3,8,&kirby.arregloAnim[AN_SPIT]);
     kirby.arregloAnim[AN_SPIT].bucle = false;
+
+    cargar_animacion(kirby_inhale_r,kirby_inhale_r_mask,2,2,&kirby.arregloAnim[AN_INHALE]);
+    kirby.arregloAnim[AN_INHALE].bucle = true;
+
+    //Sprites de kirby en mirror
+    cargar_animacion(kirbyfat_jump_r_mirror,kirbyfat_jump_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_FAT_FALL]);
+    kirby.arregloAnimMirror[AN_FAT_FALL].bucle = true;
+
+    cargar_animacion(kirby_idle_r_mirror,kirby_idle_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_IDLE]);
+    kirby.arregloAnimMirror[AN_IDLE].bucle = true;
+
+    cargar_animacion(kirby_jump_r_mirror,kirby_jump_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_JUMP]);
+    kirby.arregloAnimMirror[AN_JUMP].bucle = true;
+
+    cargar_animacion(kirby_walk_r_mirror,kirby_walk_r_mask_mirror,4,3,&kirby.arregloAnimMirror[AN_WALK]);
+    kirby.arregloAnimMirror[AN_WALK].bucle = true;
+
+    cargar_animacion(kirby_eat_r_mirror,kirby_eat_r_mask_mirror,3,5,&kirby.arregloAnimMirror[AN_EAT]);
+    kirby.arregloAnimMirror[AN_EAT].bucle = false;
+
+    cargar_animacion(kirbyfat_idle_r_mirror,kirby_idle_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_FAT_IDLE]);
+    kirby.arregloAnimMirror[AN_FAT_IDLE].bucle = true;
+
+    cargar_animacion(kirbyfat_walk_r_mirror,kirbyfat_walk_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_FAT_WALK]);
+    kirby.arregloAnimMirror[AN_FAT_WALK].bucle = true;
+
+    cargar_animacion(kirbyfatair_walk_r_mirror,kirbyfatair_walk_r_mask_mirror,2,7,&kirby.arregloAnimMirror[AN_FLY]);
+    kirby.arregloAnimMirror[AN_FLY].bucle = false;
+
+    cargar_animacion(kirby_spit_r_mirror,kirby_spit_r_mask_mirror,3,8,&kirby.arregloAnimMirror[AN_SPIT]);
+    kirby.arregloAnimMirror[AN_SPIT].bucle = false;
+
+    cargar_animacion(kirby_inhale_r_mirror,kirby_inhale_r_mask_mirror,2,2,&kirby.arregloAnimMirror[AN_INHALE]);
+    kirby.arregloAnimMirror[AN_INHALE].bucle = true;    
 
     ini_kirby(&kirby, 100, ventana.altoVentana() - 50);    
 
