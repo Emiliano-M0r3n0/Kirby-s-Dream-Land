@@ -48,6 +48,11 @@
 #define GRAVEDAD 1200.0f
 #define DT (1.0f / 60.0f)
 
+typedef struct Hitbox{
+    float x,y;
+    float height,width;
+}Hitbox;
+
 /// @brief Estructura utilizada para encapsular las lecturas del joystick
 typedef struct EjeJoystick{
 
@@ -94,10 +99,22 @@ typedef struct Animacion{
 
 } Animacion;
 
+typedef struct Proyectil {
+
+    float x, y;       // Posición
+    float velX;       // Velocidad horizontal
+    bool activo;      // Si está activo en pantalla
+    bool esEstrella;  // true = estrella, false = humo
+    Hitbox hitbox;    
+    int timerdisparo;        // Tiempo de vida
+    Animacion arregloProyectil[2]; //2 Animaciones estrella y humo
+    Animacion arregloProyectilMirror[2];
+} Proyectil;
+
 typedef struct Kirby {
-    // Timers
+    // Timer
     float timerAccion;
-    // Posición y Física
+    // Posicion y velocidades
     float x, y;
     float velX, velY;
     int estado;
@@ -109,9 +126,8 @@ typedef struct Kirby {
     Animacion *animActual;
     //Arreglo en el que se encuentran todas las animaciones
     Animacion arregloAnim[AN_COUNT];
-
     Animacion arregloAnimMirror[AN_COUNT];
-    
+    Proyectil proyectil;
 } Kirby;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
@@ -147,8 +163,6 @@ void ini_lens(Lectura *lens,Board *board,uint8_t pin_action, uint8_t pin_jump, u
 /// @param terminal (true) en caso de querer ver una terminal con los valores que leemos
 void leer_entrada(Lectura *lens,EjeJoystick *EjeX,bool terminal);
 
-void reiniciar_animacion(Animacion *anim);
-
 /// @brief Selecciona un frame del arreglo y lo devuelve generando la animacion
 /// @param anim Animacion deseada
 /// @return Frame del arreglo
@@ -179,12 +193,5 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 
 /// @brief En base al estado de kirby selecciona la animación que tiene que ser plasmada
 /// @param k Direccion de la variable tipo Kirby
-/// @param idle Animacion en estado quieto
-/// @param walk Animacion caminando
-/// @param jump Animacion saltando
-/// @param eat Animacion comiendo
-/// @param fat_idle Animacion gordito en estaado quieto
-/// @param fly Animacion volando
-/// @param spit Animacion escupiendo
 void seleccionar_animacion_kirby(Kirby *k); 
 #endif

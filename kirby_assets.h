@@ -7,4 +7,6 @@
 // Carga TODAS las animaciones de Kirby en su arreglo
 void cargar_animaciones_kirby(Kirby *k);
 
+void cargar_animacionesmirror_kirby(Kirby *k);
+
 #endif

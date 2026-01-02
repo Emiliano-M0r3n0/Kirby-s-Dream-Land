@@ -3,7 +3,7 @@ MAIN = main.c
 
 #Incluye las librerias que necesites, se incluye el .c, todas tus librerias se colocan en una misma variable, separalas por espacios
 #---------------------------------
-LIBS = graficos.c serial.c simplecontroller.c control_esp.c
+LIBS = graficos.c serial.c simplecontroller.c control_esp.c kirby_assets.c
 #Reglas para permitir el enlazado correcto
 OBJ = $(LIBS:.c=.o)
 DEPS = $(OBJ:.o=.d)
