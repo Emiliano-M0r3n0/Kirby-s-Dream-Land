@@ -9,4 +9,6 @@ void cargar_animaciones_kirby(Kirby *k);
 
 void cargar_animacionesmirror_kirby(Kirby *k);
 
+void cargar_animaciones_enemies(Enemigo *enemies);
+
 #endif

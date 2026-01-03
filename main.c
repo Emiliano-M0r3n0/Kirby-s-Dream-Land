@@ -33,92 +33,17 @@ int main()
     const int ESCALA = 65;
     const int DELAY = 50;
 
-    const char *bronto_walk[] = {
-        "Enemigos/Bronto.bmp",
-        "Enemigos/Bronto2.bmp"
-    }; 
-
-    const char *bronto_walk_mask[] = {
-        "Enemigos/Brontomask.bmp",
-        "Enemigos/Bronto2mask.bmp"        
-    };
-
-    const char *cappy_walk[] = {
-        "Enemigos/Cappy.bmp",
-        "Enemigos/Cappy2.bmp",
-        "Enemigos/Cappy3.bmp"
-    };
-
-    const char *cappy_walk_mask[] = {
-        "Enemigos/Cappymask.bmp",
-        "Enemigos/Cappy2mask.bmp",
-        "Enemigos/Cappy3mask.bmp"
-    };
-
-    const char *grizzo[] = {
-        "Enemigos/Grizzo.bmp",
-        "Enemigos/Grizzo2.bmp"
-    };
-
-    const char *grizzo_mask[] = {
-        "Enemigos/Grizzomask.bmp",
-        "Enemigos/Grizzo2mask.bmp"
-    };
-
-    const char* manzana[] = {
-        "Enemigos/Manzana.bmp",
-        "Enemigos/Manzana2.bmp",
-        "Enemigos/Manzana3.bmp",
-        "Enemigos/Manzana4.bmp"
-    };
-
-    const char* manzana_mask[] = {
-        "Enemigos/Manzanamask.bmp",
-        "Enemigos/Manzana2mask.bmp",
-        "Enemigos/Manzana3mask.bmp",
-        "Enemigos/Manzana4mask.bmp"
-    };
-
-    const char* poppybros[] = {
-        "Enemigos/Poppybros.bmp",
-        "Enemigos/Poppybros2.bmp"
-    };
-
-    const char* poppybros_mask[] = {
-        "Enemigos/Poppybrosmask.bmp",
-        "Enemigos/Poppybros2mask.bmp"
-    };
-
-    const char* twizzy[] = {
-        "Enemigos/Twizzy.bmp",
-        "Enemigos/Twizzy2.bmp"
-    };
-
-    const char* twizzy_mask[] = {
-        "Enemigos/Twizzymask.bmp",
-        "Enemigos/Twizzy2mask.bmp"
-    };
-
-    const char* wadledee[] = {
-        "Enemigos/WadleDee.bmp",
-        "Enemigos/WadleDee2.bmp"
-    };
-
-    const char* wadledee_mask[] = {
-        "Enemigos/WadleDeemask.bmp",
-        "Enemigos/WadleDee2mask.bmp"
-    };
-
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
     ventana.tamanioVentana(800,600);
 
-    //Animaciones de los enemigos
-    Animacion enemianimbronto_l;
-
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
     Kirby kirby;
+
+    Enemigo enemies;
+
+    cargar_animaciones_enemies(&enemies);
 
     cargar_animaciones_kirby(&kirby);
 
@@ -126,9 +51,14 @@ int main()
 
     ini_kirby(&kirby, 100, ventana.altoVentana() - 50);    
 
-    //Sprites de Enemigos
-    cargar_animacion(bronto_walk,bronto_walk_mask,2,2,&enemianimbronto_l);
+    enemies.x = 400.0f;
+    enemies.y = ventana.altoVentana() - 50.0f;
+    enemies.activo = true;
+    enemies.typeenemie = EN_WADLE;
 
+    actualizar_hitbox_enemie(&enemies);
+
+    seleccionar_enemies(&enemies);
     //Configuraciones y calibraciones del Esp32
     Board *esp32 = connectDevice("COM6",B230400);
     esp32->pinMode(esp32,JX,INPUT);
@@ -170,6 +100,19 @@ while (1)
 
     actualizar_kirby(&kirby,&lectura_general,DT,ventana.anchoVentana(),ventana.altoVentana());
 
+    if (kirby.estado == ST_INHALE && enemies.activo)
+    {
+        if (kirby.timerAccion >= 0.2f && kirby.timerAccion < 0.4f)
+        {
+            if (hitbox_colision(kirby.succionhitbox,enemies.hitbox))
+            {
+                enemies.activo = false;
+                kirby.stomach_wenemie = true;
+                kirby.enemies_eaten++;
+            }
+        }
+    }
+
     if (lectura_general.mtr_on != last_mtr) 
     {
     lectura_general.board->digitalWrite(lectura_general.board,lectura_general.pin_mtr,lectura_general.mtr_on);
@@ -179,8 +122,11 @@ while (1)
     seleccionar_animacion_kirby(&kirby);
 
     sprite = animacion_actual(kirby.animActual);
-
     ventana.limpiaVentana();
+    if (enemies.activo)
+    {
+        ventana.muestraImagenEscalada((int)enemies.x,(int)enemies.y,ESCALA,ESCALA,animacion_actual(enemies.animActual));
+    }
     ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
     ventana.actualizaVentana();
     ventana.espera(16);

@@ -18,6 +18,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+//Definicion de enemigos
+#define EN_BRONTO        0
+#define EN_CAPPY         1
+#define EN_GRIZZO        2
+#define EN_MANZANA       3
+#define EN_POPPY         4
+#define EN_TWIZZY        5
+#define EN_WADLE         6
+#define EN_COUNT         7
 // Definicion de estados de Kirby
 #define ST_IDLE          0
 #define ST_WALKING       1
@@ -62,6 +71,7 @@ typedef struct EjeJoystick{
 
 }EjeJoystick;
 
+/// @brief Almacena los datos de un boton y sus pulsasiones
 typedef struct Boton {
     Board *board;
     uint8_t pin;
@@ -99,6 +109,7 @@ typedef struct Animacion{
 
 } Animacion;
 
+/// @brief Estructura que describe las fisicas y estados del proyectil de kirby
 typedef struct Proyectil {
 
     float x, y;       // Posición
@@ -111,6 +122,7 @@ typedef struct Proyectil {
     Animacion arregloProyectilMirror[2];
 } Proyectil;
 
+/// @brief Estructura que alberga todas las variables necesarias para el funcionamiento de kirby
 typedef struct Kirby {
     // Timer
     float timerAccion;
@@ -128,7 +140,25 @@ typedef struct Kirby {
     Animacion arregloAnim[AN_COUNT];
     Animacion arregloAnimMirror[AN_COUNT];
     Proyectil proyectil;
+    
+    Hitbox kirbyhitbox; //Hitbox kirby
+
+    Hitbox succionhitbox;
+
+    bool stomach_wenemie; //Estomago con enemigo
+    bool Gordito; //Gordito o no gordito
+    int enemies_eaten; //Numero de enemigos que ha comido
+
 } Kirby;
+
+typedef struct Enemigo {
+    float x, y;
+    Hitbox hitbox;
+    Animacion arregloEnemies[EN_COUNT];
+    Animacion *animActual;
+    int typeenemie;
+    bool activo;
+}Enemigo;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
 /// @param Eje Direccion del Eje el cual inicializaremos
@@ -174,7 +204,19 @@ Imagen* animacion_actual(Animacion *anim);
 /// @param total_frames Numero total de imagenes
 /// @param delay_frames Numero de frames de delay
 /// @param anim Estructura en la que se guardara
-void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim); 
+void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_frames,int delay_frames,Animacion *anim);
+
+/// @brief Detecta la colision entre dos hitbox 
+/// @param a Hitbox a
+/// @param b Hitbox b
+/// @return true en caso de que colisionen, false en caso de que no
+bool hitbox_colision(Hitbox a, Hitbox b);
+
+void actualizar_hitbox_kirby(Kirby *k);
+
+void actualizar_hitbox_succion(Kirby *k);
+
+void actualizar_hitbox_enemie(Enemigo *enemie);
 
 /// @brief Inicializa una variable de tipo kirby, inicia su animacion en estado quieto y en las posiciones indicadas
 /// @param k Dirección de la variable tipo Kirby
@@ -194,4 +236,6 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 /// @brief En base al estado de kirby selecciona la animación que tiene que ser plasmada
 /// @param k Direccion de la variable tipo Kirby
 void seleccionar_animacion_kirby(Kirby *k); 
+
+void seleccionar_enemies(Enemigo *enemies);
 #endif

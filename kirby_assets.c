@@ -1,4 +1,5 @@
 #include "kirby_assets.h"
+#include "control_esp.h"
 
 void cargar_animaciones_kirby(Kirby *k)
 {
@@ -337,4 +338,105 @@ void cargar_animacionesmirror_kirby(Kirby *k)
 
     cargar_animacion(estrella_mirror,estrella_mask_mirror,3,3,&k->proyectil.arregloProyectilMirror[1]);
     k->proyectil.arregloProyectilMirror[1].bucle = true;
+}
+
+void cargar_animaciones_enemies(Enemigo *enemies)
+{
+    static const char *bronto_walk[] = {
+        "Enemigos/Bronto.bmp",
+        "Enemigos/Bronto2.bmp"
+    }; 
+
+    static const char *bronto_walk_mask[] = {
+        "Enemigos/Brontomask.bmp",
+        "Enemigos/Bronto2mask.bmp"        
+    };
+
+    static const char *cappy_walk[] = {
+        "Enemigos/Cappy.bmp",
+        "Enemigos/Cappy2.bmp",
+        "Enemigos/Cappy3.bmp"
+    };
+
+    static const char *cappy_walk_mask[] = {
+        "Enemigos/Cappymask.bmp",
+        "Enemigos/Cappy2mask.bmp",
+        "Enemigos/Cappy3mask.bmp"
+    };
+
+    static const char *grizzo[] = {
+        "Enemigos/Grizzo.bmp",
+        "Enemigos/Grizzo2.bmp"
+    };
+
+    static const char *grizzo_mask[] = {
+        "Enemigos/Grizzomask.bmp",
+        "Enemigos/Grizzo2mask.bmp"
+    };
+
+    static const char* manzana[] = {
+        "Enemigos/Manzana.bmp",
+        "Enemigos/Manzana2.bmp",
+        "Enemigos/Manzana3.bmp",
+        "Enemigos/Manzana4.bmp"
+    };
+
+    static const char* manzana_mask[] = {
+        "Enemigos/Manzanamask.bmp",
+        "Enemigos/Manzana2mask.bmp",
+        "Enemigos/Manzana3mask.bmp",
+        "Enemigos/Manzana4mask.bmp"
+    };
+
+    static const char* poppybros[] = {
+        "Enemigos/Poppybros.bmp",
+        "Enemigos/Poppybros2.bmp"
+    };
+
+    static const char* poppybros_mask[] = {
+        "Enemigos/Poppybrosmask.bmp",
+        "Enemigos/Poppybros2mask.bmp"
+    };
+
+    static const char* twizzy[] = {
+        "Enemigos/Twizzy.bmp",
+        "Enemigos/Twizzy2.bmp"
+    };
+
+    static const char* twizzy_mask[] = {
+        "Enemigos/Twizzymask.bmp",
+        "Enemigos/Twizzy2mask.bmp"
+    };
+
+    static const char* wadledee[] = {
+        "Enemigos/WadleDee.bmp",
+        "Enemigos/WadleDee2.bmp"
+    };
+
+    static const char* wadledee_mask[] = {
+        "Enemigos/WadleDeemask.bmp",
+        "Enemigos/WadleDee2mask.bmp"
+    };
+
+    cargar_animacion(bronto_walk,bronto_walk_mask,2,3,&enemies->arregloEnemies[EN_BRONTO]);
+    enemies->arregloEnemies[EN_BRONTO].bucle = true;
+
+    cargar_animacion(cappy_walk,cappy_walk_mask,3,4,&enemies->arregloEnemies[EN_CAPPY]);
+    enemies->arregloEnemies[EN_CAPPY].bucle = true;
+
+    cargar_animacion(grizzo,grizzo_mask,2,3,&enemies->arregloEnemies[EN_GRIZZO]);
+    enemies->arregloEnemies[EN_GRIZZO].bucle = true;
+
+    cargar_animacion(manzana,manzana_mask,4,6,&enemies->arregloEnemies[EN_MANZANA]);
+    enemies->arregloEnemies[EN_MANZANA].bucle = true;
+
+    cargar_animacion(poppybros,poppybros_mask,2,3,&enemies->arregloEnemies[EN_POPPY]);
+    enemies->arregloEnemies[EN_POPPY].bucle = true;
+
+    cargar_animacion(twizzy,twizzy_mask,2,3,&enemies->arregloEnemies[EN_TWIZZY]);
+    enemies->arregloEnemies[EN_TWIZZY].bucle = true;
+
+    cargar_animacion(wadledee,wadledee_mask,2,3,&enemies->arregloEnemies[EN_WADLE]);
+    enemies->arregloEnemies[EN_WADLE].bucle = true;
+
 }
