@@ -4,9 +4,12 @@
 #include "graficos.h"
 #include "control_esp.h"
 
-// Carga TODAS las animaciones de Kirby en su arreglo
+/// @brief Carga las animaciones de kirby, saltar, comer, inhalar, etc. 
+/// @param k Direccion de la variable kirby donde se guardaran las direcciones de memoria
 void cargar_animaciones_kirby(Kirby *k);
 
+/// @brief Cargar las animaciones de kirby inversas
+/// @param k Direccion de la variable kirby donde se guardaran las direcciones de memoria
 void cargar_animacionesmirror_kirby(Kirby *k);
 
 void cargar_animaciones_enemies(Enemigo *enemies);

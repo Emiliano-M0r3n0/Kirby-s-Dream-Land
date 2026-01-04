@@ -90,6 +90,7 @@ int main()
 
 while (1)
 {
+    //Logica
     static bool last_mtr = false;
 
     leer_entrada(&lectura_general, &EjeX, true);
@@ -122,11 +123,41 @@ while (1)
     seleccionar_animacion_kirby(&kirby);
 
     sprite = animacion_actual(kirby.animActual);
+
+    actualizar_proyectil(&kirby.proyectil,DT);
+
+    if (kirby.proyectil.activo && enemies.activo)
+    {
+        if (hitbox_colision(kirby.proyectil.hitbox,enemies.hitbox))
+        {
+            if (kirby.proyectil.esEstrella)
+            {
+                enemies.activo = false;
+            }
+            else
+            {
+                enemies.x += kirby.proyectil.velX * 0.1f;
+                actualizar_hitbox_enemie(&enemies);
+            }
+            kirby.proyectil.activo = false;
+        } 
+    }
+    
+    //Dibujo
     ventana.limpiaVentana();
     if (enemies.activo)
     {
         ventana.muestraImagenEscalada((int)enemies.x,(int)enemies.y,ESCALA,ESCALA,animacion_actual(enemies.animActual));
     }
+    if (kirby.proyectil.activo)
+    {
+        seleccionar_proyectil(&kirby);
+        if(kirby.proyectil.esEstrella)
+        {ventana.muestraImagenEscalada((int)kirby.proyectil.x,kirby.proyectil.y,ESCALA-35,ESCALA-35,animacion_actual(kirby.proyectil.animActual));}
+        else
+        {ventana.muestraImagenEscalada((int)kirby.proyectil.x,kirby.proyectil.y,ESCALA-25,ESCALA-25,animacion_actual(kirby.proyectil.animActual));}
+    }
+    
     ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
     ventana.actualizaVentana();
     ventana.espera(16);

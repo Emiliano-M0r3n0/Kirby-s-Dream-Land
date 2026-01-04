@@ -166,6 +166,46 @@ void actualizar_hitbox_enemie(Enemigo *enemie)
     enemie->hitbox.height = 50.0f - margenTop - margenBottom;
 }
 
+void crear_proyectil(Proyectil *p,float x, float y,bool mirandoDerecha,bool esEstrella)
+{
+    p->x = x;
+    p->y = y + 25.0f; //Altura de la boca
+    p->velX = mirandoDerecha ? 500.0f : -500.0f;
+    p->activo = true;
+    p->esEstrella = esEstrella;
+    p->timerdisparo = 90;
+
+    //Creacion de hitbox
+    p->hitbox.x = p->x;
+    p->hitbox.y = p->y;
+    if (esEstrella)
+    {
+        p->hitbox.width = 20.0f;
+        p->hitbox.height = 20.0f;
+    }
+    else
+    {
+        p->hitbox.width = 30.0f;
+        p->hitbox.height = 25.0f;
+    }
+}
+
+void actualizar_proyectil(Proyectil *p,float dt)
+{
+    if(!p->activo) return;
+
+    p->x += p->velX * dt;
+    p->hitbox.x = p->x;
+    p->hitbox.y = p->y;
+
+    p->timerdisparo--;
+    if (p->timerdisparo <= 0)
+    {
+        p->activo = false;
+    }
+    
+}
+
 void ini_kirby(Kirby *k, float x, float y) {
     k->x = x; //Aparece en la posicion inicial
     k->y = y;
@@ -281,9 +321,14 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
             k->velY += GRAVEDAD *dt;
             k->timerAccion += dt;
             input->mtr_on = true;
+            if (k->timerAccion < 0.1f)
+            {
+             crear_proyectil(&k->proyectil,k->x,k->y,k->mirandoDerecha,k->stomach_wenemie);   
+            }
             if (k->timerAccion >= 0.4f) {
                 k->estado = ST_IDLE; 
-                input->mtr_on = false; 
+                input->mtr_on = false;
+                k->Gordito = false; 
                 if (k->stomach_wenemie)
                 {
                     k->stomach_wenemie = false;
@@ -338,4 +383,22 @@ void seleccionar_enemies(Enemigo *enemies)
 {
     int indice = enemies->typeenemie;
     enemies->animActual = &enemies->arregloEnemies[indice];
+}
+
+void seleccionar_proyectil(Kirby *kirby)
+{
+    int indice;
+    if (kirby->proyectil.esEstrella) indice = 1;
+    else
+    {
+        indice = 0;
+    }
+    if(kirby->mirandoDerecha)
+    {
+        kirby->proyectil.animActual = &kirby->proyectil.arregloProyectil[indice];
+    }
+    else if(kirby->mirandoDerecha == false)
+    {
+        kirby->proyectil.animActual = &kirby->proyectil.arregloProyectilMirror[indice];
+    }
 }

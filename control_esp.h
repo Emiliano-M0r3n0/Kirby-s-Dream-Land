@@ -57,6 +57,7 @@
 #define GRAVEDAD 1200.0f
 #define DT (1.0f / 60.0f)
 
+/// @brief Estructura que define la cajita conocida como hitbox
 typedef struct Hitbox{
     float x,y;
     float height,width;
@@ -119,7 +120,8 @@ typedef struct Proyectil {
     Hitbox hitbox;    
     int timerdisparo;        // Tiempo de vida
     Animacion arregloProyectil[2]; //2 Animaciones estrella y humo
-    Animacion arregloProyectilMirror[2];
+    Animacion arregloProyectilMirror[2]; //Estrella 0 y humo 1
+    Animacion *animActual;
 } Proyectil;
 
 /// @brief Estructura que alberga todas las variables necesarias para el funcionamiento de kirby
@@ -151,6 +153,7 @@ typedef struct Kirby {
 
 } Kirby;
 
+/// @brief Estructura de un enemigo
 typedef struct Enemigo {
     float x, y;
     Hitbox hitbox;
@@ -166,6 +169,10 @@ typedef struct Enemigo {
 /// @param pin Pin al que esta conectado el eje del joystick
 void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin);
 
+/// @brief Detecta los flancos y si un boton fue presionado o soltado
+/// @param button Boton a detectar
+/// @param board Placa a la cual esta conectado
+/// @return true en caso de presionado, false en caso de soltado
 bool fue_presionado(Boton *button,Board *board);
 
 /// @brief Inicia la calibracion, hace un promedio de lecturas para obtener el offset
@@ -212,11 +219,30 @@ void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_
 /// @return true en caso de que colisionen, false en caso de que no
 bool hitbox_colision(Hitbox a, Hitbox b);
 
+/// @brief Actualiza la hitbox de kirby tras un cambio de posicion
+/// @param k Direccion de la variable kirby
 void actualizar_hitbox_kirby(Kirby *k);
 
+/// @brief Actualiza la hitbox generada para succionar un enemigo tras un cambio de posicon
+/// @param k Direccion de la variable kirby
 void actualizar_hitbox_succion(Kirby *k);
 
+/// @brief Actualiza la hitbox de un enemigo tras un cambio de posicion
+/// @param enemie Direccion de la variable enemigo
 void actualizar_hitbox_enemie(Enemigo *enemie);
+
+/// @brief Crea un proyectil en funcion de la posicion 'x' y 'y', segun la orientacion de kirby y si tiene un enemigo en su estomago
+/// @param p Direccion de la variable tipo proyectil
+/// @param x Coordenada X inicial
+/// @param y Coordenada Y inicial
+/// @param mirandoDerecha Orientacion de kirby 'true' derecha 'false' izq
+/// @param esEstrella 'true' tiene un enemigo escupe estrella 'false' no tiene enemigo por lo tanto escupe humo
+void crear_proyectil(Proyectil *p,float x, float y,bool mirandoDerecha,bool esEstrella);
+
+/// @brief Actualiza las fisicas del proyectil en base a si esta activo o no
+/// @param p Direccion de la variable tipo proyectil
+/// @param dt Variable DT
+void actualizar_proyectil(Proyectil *p,float dt);
 
 /// @brief Inicializa una variable de tipo kirby, inicia su animacion en estado quieto y en las posiciones indicadas
 /// @param k Dirección de la variable tipo Kirby
@@ -237,5 +263,11 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 /// @param k Direccion de la variable tipo Kirby
 void seleccionar_animacion_kirby(Kirby *k); 
 
+/// @brief En base al tipo de enemigo, decide que animacion de enemigo selecciona
+/// @param enemies Direccion de la variable tipo enemigo
 void seleccionar_enemies(Enemigo *enemies);
+
+/// @brief En base a el contenido del estomago de kirby decide que proyectil dispara
+/// @param kirby Direccion de la variable tipo kirby
+void seleccionar_proyectil(Kirby *kirby);
 #endif
