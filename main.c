@@ -4,9 +4,9 @@
  * @brief Kirbys Dreamland
  * @version 0.1
  * @date 2025-12-22A
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  * Numero de boleta 2026640066
  * Grupo: 1MM3
  */
@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-//Pines para el ESP32
+// Pines para el ESP32
 #define JX 35
 #define JY 34
 #define MTR 19
@@ -29,26 +29,23 @@
 
 int main()
 {
-    //Elementos para imagenes
+    // Elementos para imagenes
     const int ESCALA = 65;
     const int DELAY = 50;
     bool fullscreen = false;
     int escalafondo;
 
-    //Configuraciones de la ventana
+    // Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
-    ventana.tamanioVentana(800,600);
+    ventana.tamanioVentana(800, 600);
 
-    Imagen *sprite; //Imagen que utilizaremos constantemente
-
-    Fondo fondoA;
-    fondoA.fondo = ventana.creaImagen("Escenarios/fondoA.bmp");
-    fondoA.alto_fondo = ventana.altoImagen(fondoA.fondo);
-    fondoA.ancho_fondo = ventana.anchoImagen(fondoA.fondo);
+    Imagen *sprite; // Imagen que utilizaremos constantemente
 
     Kirby kirby;
 
     Enemigo enemies;
+
+    cargar_all_fondos(&kirby.fondo);
 
     cargar_animaciones_enemies(&enemies);
 
@@ -56,7 +53,7 @@ int main()
 
     cargar_animacionesmirror_kirby(&kirby);
 
-    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);    
+    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);
 
     enemies.x = 400.0f;
     enemies.y = ventana.altoVentana() - 50.0f;
@@ -66,116 +63,121 @@ int main()
     actualizar_hitbox_enemie(&enemies);
 
     seleccionar_enemies(&enemies);
-    //Configuraciones y calibraciones del Esp32
-    Board *esp32 = connectDevice("COM6",B230400);
-    esp32->pinMode(esp32,JX,INPUT);
-    esp32->pinMode(esp32,JY,INPUT);
-    esp32->pinMode(esp32,MTR,OUTPUT);
-    esp32->pinMode(esp32,BUTTON_JUMP,INPUT_PULLUP);
-    esp32->pinMode(esp32,BUTTON_ACTION,INPUT_PULLUP);
-    esp32->pinMode(esp32,BUTTON_DOWN,INPUT_PULLUP);
+    // Configuraciones y calibraciones del Esp32
+    Board *esp32 = connectDevice("COM6", B230400);
+    esp32->pinMode(esp32, JX, INPUT);
+    esp32->pinMode(esp32, JY, INPUT);
+    esp32->pinMode(esp32, MTR, OUTPUT);
+    esp32->pinMode(esp32, BUTTON_JUMP, INPUT_PULLUP);
+    esp32->pinMode(esp32, BUTTON_ACTION, INPUT_PULLUP);
+    esp32->pinMode(esp32, BUTTON_DOWN, INPUT_PULLUP);
 
     EjeJoystick EjeX;
     EjeJoystick EjeY;
 
     Lectura lectura_general;
 
-    ini_joystick(&EjeX,esp32,JX);
-    ini_joystick(&EjeY,esp32,JY);
+    ini_joystick(&EjeX, esp32, JX);
+    ini_joystick(&EjeY, esp32, JY);
 
-    ini_lens(&lectura_general,esp32,BUTTON_ACTION,BUTTON_JUMP,BUTTON_DOWN,MTR);
+    ini_lens(&lectura_general, esp32, BUTTON_ACTION, BUTTON_JUMP, BUTTON_DOWN, MTR);
 
     ventana.colorFondo(COLORES.NEGRO);
     ventana.limpiaVentana();
     ventana.actualizaVentana();
     ventana.espera(100);
 
-    ini_calibracion(&EjeX,500);
-    ini_calibracion(&EjeY,500);
+    ini_calibracion(&EjeX, 500);
+    ini_calibracion(&EjeY, 500);
+
+    crear_escalas_fondos(&kirby.fondo);
 
     Animacion *anim_act;
 
-while (1)
-{
-    //Logica
-    fondoA.conversion_alto = (float)ventana.altoVentana() / (float)fondoA.alto_fondo;
-    fondoA.ancho_convertido = (float)fondoA.ancho_fondo * fondoA.conversion_alto;
-    fondoA.alto_convertido = (float)fondoA.alto_fondo * fondoA.conversion_alto;
-    if (ventana.teclaPresionada() == TECLAS.F9) {
-    fullscreen = !fullscreen;
-    ventana.pantallaCompleta(fullscreen);
-    }
-
-    static bool last_mtr = false;
-
-    leer_entrada(&lectura_general, &EjeX, true);
-
-    kirby.action_p = fue_presionado(&lectura_general.button_action,lectura_general.board);
-
-    kirby.jump_p = fue_presionado(&lectura_general.button_jump,lectura_general.board);
-
-    actualizar_kirby(&kirby,&lectura_general,DT,ventana.anchoVentana(),ventana.altoVentana());
-
-    if (kirby.estado == ST_INHALE && enemies.activo)
+    while (1)
     {
-        if (kirby.timerAccion >= 0.2f && kirby.timerAccion < 0.4f)
+        // Logica
+        if (ventana.teclaPresionada() == TECLAS.F9)
         {
-            if (hitbox_colision(kirby.succionhitbox,enemies.hitbox))
+            fullscreen = !fullscreen;
+            ventana.pantallaCompleta(fullscreen);
+            crear_escalas_fondos(&kirby.fondo);
+        }
+
+        static bool last_mtr = false;
+
+        leer_entrada(&lectura_general, &EjeX, false);
+
+        kirby.action_p = fue_presionado(&lectura_general.button_action, lectura_general.board);
+
+        kirby.jump_p = fue_presionado(&lectura_general.button_jump, lectura_general.board);
+
+        actualizar_kirby(&kirby, &lectura_general, DT, ventana.anchoVentana(), ventana.altoVentana());
+
+        if (kirby.estado == ST_INHALE && enemies.activo)
+        {
+            if (kirby.timerAccion >= 0.2f && kirby.timerAccion < 0.4f)
             {
-                enemies.activo = false;
-                kirby.stomach_wenemie = true;
-                kirby.enemies_eaten++;
+                if (hitbox_colision(kirby.succionhitbox, enemies.hitbox))
+                {
+                    enemies.activo = false;
+                    kirby.stomach_wenemie = true;
+                    kirby.enemies_eaten++;
+                }
             }
         }
-    }
 
-    if (lectura_general.mtr_on != last_mtr) 
-    {
-    lectura_general.board->digitalWrite(lectura_general.board,lectura_general.pin_mtr,lectura_general.mtr_on);
-    last_mtr = lectura_general.mtr_on;
-    }
-
-    seleccionar_animacion_kirby(&kirby);
-
-    sprite = animacion_actual(kirby.animActual);
-
-    actualizar_proyectil(&kirby.proyectil,DT);
-
-    if (kirby.proyectil.activo && enemies.activo)
-    {
-        if (hitbox_colision(kirby.proyectil.hitbox,enemies.hitbox))
+        if (lectura_general.mtr_on != last_mtr)
         {
+            lectura_general.board->digitalWrite(lectura_general.board, lectura_general.pin_mtr, lectura_general.mtr_on);
+            last_mtr = lectura_general.mtr_on;
+        }
+
+        seleccionar_animacion_kirby(&kirby);
+
+        sprite = animacion_actual(kirby.animActual);
+
+        actualizar_proyectil(&kirby.proyectil, DT);
+
+        if (kirby.proyectil.activo && enemies.activo)
+        {
+            if (hitbox_colision(kirby.proyectil.hitbox, enemies.hitbox))
+            {
+                if (kirby.proyectil.esEstrella)
+                {
+                    enemies.activo = false;
+                }
+                else
+                {
+                    enemies.x += kirby.proyectil.velX * 0.1f;
+                    actualizar_hitbox_enemie(&enemies);
+                }
+                kirby.proyectil.activo = false;
+            }
+        }
+
+        // Dibujo
+        ventana.limpiaVentana();
+        dibujar_fondo(&kirby.fondo,FO_A);
+        if (enemies.activo)
+        {
+            ventana.muestraImagenEscalada((int)enemies.x, (int)enemies.y, ESCALA, ESCALA, animacion_actual(enemies.animActual));
+        }
+        if (kirby.proyectil.activo)
+        {
+            seleccionar_proyectil(&kirby);
             if (kirby.proyectil.esEstrella)
             {
-                enemies.activo = false;
+                ventana.muestraImagenEscalada((int)kirby.proyectil.x, kirby.proyectil.y, ESCALA - 35, ESCALA - 35, animacion_actual(kirby.proyectil.animActual));
             }
             else
             {
-                enemies.x += kirby.proyectil.velX * 0.1f;
-                actualizar_hitbox_enemie(&enemies);
+                ventana.muestraImagenEscalada((int)kirby.proyectil.x, kirby.proyectil.y, ESCALA - 25, ESCALA - 25, animacion_actual(kirby.proyectil.animActual));
             }
-            kirby.proyectil.activo = false;
-        } 
+        }
+        ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
+        ventana.actualizaVentana();
+        ventana.espera(16);
     }
-    
-    //Dibujo
-    ventana.limpiaVentana();
-    ventana.muestraImagenEscalada(0,0,(int)fondoA.ancho_convertido,(int)fondoA.alto_convertido,fondoA.fondo);
-    if (enemies.activo)
-    {
-        ventana.muestraImagenEscalada((int)enemies.x,(int)enemies.y,ESCALA,ESCALA,animacion_actual(enemies.animActual));
-    }
-    if (kirby.proyectil.activo)
-    {
-        seleccionar_proyectil(&kirby);
-        if(kirby.proyectil.esEstrella)
-        {ventana.muestraImagenEscalada((int)kirby.proyectil.x,kirby.proyectil.y,ESCALA-35,ESCALA-35,animacion_actual(kirby.proyectil.animActual));}
-        else
-        {ventana.muestraImagenEscalada((int)kirby.proyectil.x,kirby.proyectil.y,ESCALA-25,ESCALA-25,animacion_actual(kirby.proyectil.animActual));}
-    }
-    ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
-    ventana.actualizaVentana();
-    ventana.espera(16);
-}
-return 0;
+    return 0;
 }
