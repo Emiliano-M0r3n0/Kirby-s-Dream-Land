@@ -39,6 +39,8 @@ int main()
 
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
+    Imagen *fondoA = ventana.creaImagen("Escenarios/fondoA.bmp");
+
     Kirby kirby;
 
     Enemigo enemies;
@@ -145,6 +147,7 @@ while (1)
     
     //Dibujo
     ventana.limpiaVentana();
+    ventana.muestraImagenEscalada(0,0,8255,600,fondoA);
     if (enemies.activo)
     {
         ventana.muestraImagenEscalada((int)enemies.x,(int)enemies.y,ESCALA,ESCALA,animacion_actual(enemies.animActual));
@@ -157,7 +160,6 @@ while (1)
         else
         {ventana.muestraImagenEscalada((int)kirby.proyectil.x,kirby.proyectil.y,ESCALA-25,ESCALA-25,animacion_actual(kirby.proyectil.animActual));}
     }
-    
     ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
     ventana.actualizaVentana();
     ventana.espera(16);

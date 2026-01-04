@@ -124,6 +124,14 @@ typedef struct Proyectil {
     Animacion *animActual;
 } Proyectil;
 
+typedef struct Camara{
+
+    float x,y;
+    float width,height;
+    float fondo_width,fondo_height;
+
+}Camara;
+
 /// @brief Estructura que alberga todas las variables necesarias para el funcionamiento de kirby
 typedef struct Kirby {
     // Timer
@@ -146,6 +154,8 @@ typedef struct Kirby {
     Hitbox kirbyhitbox; //Hitbox kirby
 
     Hitbox succionhitbox;
+
+    Camara camara;
 
     bool stomach_wenemie; //Estomago con enemigo
     bool Gordito; //Gordito o no gordito

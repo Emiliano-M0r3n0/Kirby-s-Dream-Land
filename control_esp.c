@@ -111,6 +111,35 @@ void cargar_animacion(const char **rutas_img, const char **rutas_mask,int total_
     anim->delay_frames = delay_frames;
 }
 
+void ini_camara(Camara *cam, float pantallaAncho, float pantallaAlto, float fondoAncho, float fondoAlto) 
+{
+    cam->x = 0;
+    cam->y = 0;
+    cam->width = pantallaAncho;
+    cam->height = pantallaAlto;
+    cam->fondo_width = fondoAncho;
+    cam->fondo_height = fondoAlto;
+}
+
+void centrar_cam_kirby(Camara *cam, Kirby *kirby) {
+    float targetX = kirby->x - cam->width / 2 + 32;  // Los 32 son para centrar la pantalla en base a los 65 pixeles de kirby
+    float targetY = kirby->y - cam->height / 2 + 32;
+    
+    // Limitar para no salir de los bordes del fondo
+    if (targetX < 0) targetX = 0;
+    if (targetX > cam->fondo_width - cam->width) targetX = cam->fondo_width - cam->width;
+    if (targetY < 0) targetY = 0;
+    if (targetY > cam->fondo_height - cam->height) targetY = cam->fondo_height - cam->height;
+    
+    cam->x = targetX;
+    cam->y = targetY;
+}
+
+void fondo_a_pantalla(Camara *cam, float fondoX, float fondoY, float *pantallaX, float *pantallaY) {
+    *pantallaX = fondoX - cam->x;
+    *pantallaY = fondoY - cam->y;
+}
+
 bool hitbox_colision(Hitbox a, Hitbox b) {
     return (a.x < b.x + b.width &&   
             a.x + a.width > b.x &&   
