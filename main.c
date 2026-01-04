@@ -32,6 +32,8 @@ int main()
     //Elementos para imagenes
     const int ESCALA = 65;
     const int DELAY = 50;
+    bool fullscreen = false;
+    int escalafondo;
 
     //Configuraciones de la ventana
     ventana.tituloVentana("Kirby's Dream Land");
@@ -39,7 +41,10 @@ int main()
 
     Imagen *sprite; //Imagen que utilizaremos constantemente
 
-    Imagen *fondoA = ventana.creaImagen("Escenarios/fondoA.bmp");
+    Fondo fondoA;
+    fondoA.fondo = ventana.creaImagen("Escenarios/fondoA.bmp");
+    fondoA.alto_fondo = ventana.altoImagen(fondoA.fondo);
+    fondoA.ancho_fondo = ventana.anchoImagen(fondoA.fondo);
 
     Kirby kirby;
 
@@ -93,6 +98,14 @@ int main()
 while (1)
 {
     //Logica
+    fondoA.conversion_alto = (float)ventana.altoVentana() / (float)fondoA.alto_fondo;
+    fondoA.ancho_convertido = (float)fondoA.ancho_fondo * fondoA.conversion_alto;
+    fondoA.alto_convertido = (float)fondoA.alto_fondo * fondoA.conversion_alto;
+    if (ventana.teclaPresionada() == TECLAS.F9) {
+    fullscreen = !fullscreen;
+    ventana.pantallaCompleta(fullscreen);
+    }
+
     static bool last_mtr = false;
 
     leer_entrada(&lectura_general, &EjeX, true);
@@ -147,7 +160,7 @@ while (1)
     
     //Dibujo
     ventana.limpiaVentana();
-    ventana.muestraImagenEscalada(0,0,8255,600,fondoA);
+    ventana.muestraImagenEscalada(0,0,(int)fondoA.ancho_convertido,(int)fondoA.alto_convertido,fondoA.fondo);
     if (enemies.activo)
     {
         ventana.muestraImagenEscalada((int)enemies.x,(int)enemies.y,ESCALA,ESCALA,animacion_actual(enemies.animActual));

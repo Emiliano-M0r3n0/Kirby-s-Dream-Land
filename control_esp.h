@@ -18,6 +18,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+//Definicion de fondos
+#define FO_A 0
+#define FO_B 1
+#define FO_C 2
+#define FO_D 3
+#define FO_Aa 4
+#define FO_COUNT 5
+
 //Definicion de enemigos
 #define EN_BRONTO        0
 #define EN_CAPPY         1
@@ -62,6 +70,13 @@ typedef struct Hitbox{
     float x,y;
     float height,width;
 }Hitbox;
+
+typedef struct Fondo{
+    Imagen *fondo;
+    int alto_fondo,ancho_fondo;
+    float conversion_alto;
+    float ancho_convertido,alto_convertido;
+}Fondo;
 
 /// @brief Estructura utilizada para encapsular las lecturas del joystick
 typedef struct EjeJoystick{
