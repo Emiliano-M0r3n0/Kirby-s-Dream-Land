@@ -30,6 +30,11 @@
 
 int main()
 {
+    // Elementos de puntuacion
+    int puntos_partida = 0;
+    int record_maximo = leer_record();
+    int vidas_kirby = 5;
+    float time_invincible = 0;
     // Elementos para imagenes
     const int ESCALA = 65;
     const int DELAY = 50;
@@ -46,7 +51,7 @@ int main()
 
     Enemigo enemies;
 
-    //Cargar animaciones de kirby/enemigos y fondos
+    // Cargar animaciones de kirby/enemigos y fondos
     cargar_all_fondos(&kirby.fondo);
 
     cargar_animaciones_enemies(&enemies);
@@ -55,12 +60,12 @@ int main()
 
     cargar_animacionesmirror_kirby(&kirby);
 
-    cargar_colisiones(&kirby.fondo.mapa,"Fondos_tiled/ATiled.csv");
+    cargar_colisiones(&kirby.fondo.mapa, "Fondos_tiled/ATiled.csv");
 
-    //inicializar variable kirby
+    // inicializar variable kirby
     ini_kirby(&kirby, 100, ventana.altoVentana() - 150);
 
-    //inicializar variable enemies
+    // inicializar variable enemies
     enemies.x = 400.0f;
     enemies.y = ventana.altoVentana() - 50.0f;
     enemies.activo = true;
@@ -93,10 +98,9 @@ int main()
 
     ini_calibracion(&EjeX, 500);
 
-
     Animacion *anim_act;
 
-    ini_camara(&kirby.camara,(float)ventana.anchoVentana(),(float)ventana.altoVentana(),kirby.fondo.ancho_original[FO_A],kirby.fondo.alto_original[FO_A]);
+    ini_camara(&kirby.camara, (float)ventana.anchoVentana(), (float)ventana.altoVentana(), kirby.fondo.ancho_original[FO_A], kirby.fondo.alto_original[FO_A]);
 
     while (1)
     {
@@ -105,13 +109,13 @@ int main()
         {
             fullscreen = !fullscreen;
             ventana.pantallaCompleta(fullscreen);
-            crear_escalas_fondos(&kirby.fondo,true);
+            crear_escalas_fondos(&kirby.fondo, true);
         }
 
         static bool last_mtr = false;
 
         leer_entrada(&lectura_general, &EjeX, false);
-        
+
         kirby.action_p = fue_presionado(&lectura_general.button_action, lectura_general.board);
         kirby.jump_p = fue_presionado(&lectura_general.button_jump, lectura_general.board);
 
@@ -120,6 +124,21 @@ int main()
         centrar_cam_kirby(&kirby);
 
         aplicar_colisiones(&kirby);
+
+        if (time_invincible > 0)
+        {
+            time_invincible -= DT;
+        }
+        else if (verificar_colision_entidades(&kirby, &enemies))
+        {
+            vidas_kirby--;
+            time_invincible = 2.0f; // 2 segundos de invulnerabilidad
+
+            if (vidas_kirby <= 0)
+            {
+                guardar_record(puntos_partida);
+            }
+        }
 
         if (kirby.estado == ST_INHALE && enemies.activo)
         {
@@ -152,6 +171,21 @@ int main()
                 if (kirby.proyectil.esEstrella)
                 {
                     enemies.activo = false;
+                    switch (enemies.typeenemie)
+                    {
+                    case EN_WADLE:
+                        puntos_partida += PTS_WADLE;
+                        break;
+                    case EN_BRONTO:
+                        puntos_partida += PTS_BRONTO;
+                        break;
+                    case EN_GRIZZO:
+                        puntos_partida += PTS_GRIZZO;
+                        break;
+                    default:
+                        puntos_partida += 50;
+                        break;
+                    }
                 }
                 else
                 {
@@ -162,12 +196,23 @@ int main()
             }
         }
 
-        //Calcular la nuevas posiciones de los objetos en la pantalla
-        calc_pos_pantalla(&kirby,&enemies);
+        // Calcular la nuevas posiciones de los objetos en la pantalla
+        calc_pos_pantalla(&kirby, &enemies);
 
         // Dibujo
         ventana.limpiaVentana();
-        dibujar_fondo(&kirby,FO_A,fullscreen);
+        dibujar_fondo(&kirby, FO_A, fullscreen);
+        char texto_hud[100];
+        sprintf(texto_hud, "VIDAS: %d  SCORE: %d  HI-SCORE: %d", vidas_kirby, puntos_partida, record_maximo);
+        ventana.texto(10, 10, texto_hud);
+
+        if (vidas_kirby <= 0)
+        {
+            ventana.texto(300, 300, "GAME OVER - RECORD GUARDADO");
+            ventana.actualizaVentana();
+            ventana.espera(3000);
+            return 0;    
+        }
         if (enemies.activo)
         {
             ventana.muestraImagenEscalada(enemies.screenX, enemies.screenY, ESCALA, ESCALA, animacion_actual(enemies.animActual));
@@ -177,14 +222,14 @@ int main()
             seleccionar_proyectil(&kirby);
             if (kirby.proyectil.esEstrella)
             {
-                ventana.muestraImagenEscalada(kirby.proyectil.screenX,kirby.proyectil.screenY, ESCALA - 35, ESCALA - 35, animacion_actual(kirby.proyectil.animActual));
+                ventana.muestraImagenEscalada(kirby.proyectil.screenX, kirby.proyectil.screenY, ESCALA - 35, ESCALA - 35, animacion_actual(kirby.proyectil.animActual));
             }
             else
             {
                 ventana.muestraImagenEscalada(kirby.proyectil.screenX, kirby.proyectil.screenY, ESCALA - 25, ESCALA - 25, animacion_actual(kirby.proyectil.animActual));
             }
         }
-        ventana.muestraImagenEscalada(kirby.screenX,kirby.screenY, ESCALA, ESCALA, sprite);
+        ventana.muestraImagenEscalada(kirby.screenX, kirby.screenY, ESCALA, ESCALA, sprite);
         ventana.actualizaVentana();
         ventana.espera(16);
     }

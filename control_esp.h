@@ -25,7 +25,6 @@
 #define FO_D 3
 #define FO_Aa 4
 #define FO_COUNT 5
-
 // Definicion de enemigos
 #define EN_BRONTO 0
 #define EN_CAPPY 1
@@ -45,7 +44,6 @@
 #define ST_SPITTING 6
 #define ST_FAT_WALKING 7
 #define ST_INHALE 8
-
 // Definicion de animaciones de Kirby
 #define AN_IDLE 0
 #define AN_WALK 1
@@ -58,23 +56,27 @@
 #define AN_SPIT 8
 #define AN_INHALE 9
 #define AN_COUNT 10 // Numero total de animaciones
-
 // Defincion de constantes
 #define SPEED_X 400.0f
 #define SALTO_FUERZA 450.0f
 #define GRAVEDAD 1200.0f
 #define DT (1.0f / 60.0f)
+// Constantes para el escalado del mapa
+#define MAPA_ANCHO 258 // Numero de columnas
+#define MAPA_ALTO 19   // Numero de filas
+#define TILE_SIZE 32   // Tamaño del sprite
+// Constantes para el valor de cada enemigo
+#define PTS_WADLE 100
+#define PTS_BRONTO 200
+#define PTS_GRIZZO 500
+#define PTS_BOSS 1000
 
-//Constantes para el escalado del mapa
-#define MAPA_ANCHO 258  //Numero de columnas
-#define MAPA_ALTO 19    //Numero de filas
-#define TILE_SIZE 32    //Tamaño del sprite
-
-typedef struct Mapa{
+typedef struct Mapa
+{
 
     int datos[MAPA_ALTO][MAPA_ANCHO];
 
-}Mapa;
+} Mapa;
 
 /// @brief Estructura que define la cajita conocida como hitbox
 typedef struct Hitbox
@@ -87,7 +89,7 @@ typedef struct Obstaculos
 {
     Hitbox box;
     bool es_suelo;
-}Obstaculos;
+} Obstaculos;
 
 typedef struct Fondos
 {
@@ -209,7 +211,7 @@ typedef struct Kirby
     bool stomach_wenemie; // Estomago con enemigo
     bool Gordito;         // Gordito o no gordito
     bool enSuelo;
-    int enemies_eaten;    // Numero de enemigos que ha comido
+    int enemies_eaten; // Numero de enemigos que ha comido
 
 } Kirby;
 
@@ -222,7 +224,11 @@ typedef struct Enemigo
     Animacion arregloEnemies[EN_COUNT];
     Animacion *animActual;
     int typeenemie;
+    int puntosEnemies;
     bool activo;
+    float velX, velY;
+    int tipo;
+    int direccion; // 1 para derecha, -1 para izquierda
 } Enemigo;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
@@ -351,8 +357,14 @@ void dibujar_fondo(Kirby *kirby, int indice, bool fs);
 
 void calc_pos_pantalla(Kirby *k, Enemigo *e);
 
-void cargar_colisiones(Mapa *m,const char *ruta);
+void cargar_colisiones(Mapa *m, const char *ruta);
 
 void aplicar_colisiones(Kirby *k);
+
+int leer_record();
+
+void guardar_record(int puntos_actuales);
+
+bool verificar_colision_entidades(Kirby *k, Enemigo *e);
 
 #endif

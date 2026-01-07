@@ -592,64 +592,157 @@ void dibujar_fondo(Kirby *kirby, int indice, bool fs)
     }
 }
 
-void calc_pos_pantalla(Kirby *k, Enemigo *e) {
+void calc_pos_pantalla(Kirby *k, Enemigo *e)
+{
     k->screenX = (int)(k->x - k->camara.x);
     k->screenY = (int)(k->y - k->camara.y);
-    
-    if (e->activo) {
+
+    if (e->activo)
+    {
         e->screenX = (int)(e->x - k->camara.x);
         e->screenY = (int)(e->y - k->camara.y);
     }
-    
-    if (k->proyectil.activo) {
+
+    if (k->proyectil.activo)
+    {
         k->proyectil.screenX = (int)(k->proyectil.x - k->camara.x);
         k->proyectil.screenY = (int)(k->proyectil.y - k->camara.y);
     }
 }
 
-void cargar_colisiones(Mapa *m,const char *ruta)
+void cargar_colisiones(Mapa *m, const char *ruta)
 {
-FILE *file = fopen(ruta, "r"); 
-    if (!file) return;
-    for (int i = 0; i < MAPA_ALTO; i++) {
-        for (int j = 0; j < MAPA_ANCHO; j++) {
-            if (fscanf(file, "%d,", &m->datos[i][j]) == EOF) break;
+    FILE *file = fopen(ruta, "r");
+    if (!file)
+        return;
+    for (int i = 0; i < MAPA_ALTO; i++)
+    {
+        for (int j = 0; j < MAPA_ANCHO; j++)
+        {
+            if (fscanf(file, "%d,", &m->datos[i][j]) == EOF)
+                break;
         }
     }
     fclose(file);
 }
 
-void aplicar_colisiones(Kirby *k) {
-// 1. COLISIÓN VERTICAL (Pies y Techo)
+void aplicar_colisiones(Kirby *k)
+{
+    // Colisiones verticales
     int col_centro = (int)((k->x + 32) / TILE_SIZE);
     int fila_pies = (int)((k->y + 64) / TILE_SIZE);
-    if (col_centro >= 0 && col_centro < MAPA_ANCHO && fila_pies >= 0 && fila_pies < MAPA_ALTO) {
-        if (k->fondo.mapa.datos[fila_pies][col_centro] != -1) {
+    if (col_centro >= 0 && col_centro < MAPA_ANCHO && fila_pies >= 0 && fila_pies < MAPA_ALTO)
+    {
+        if (k->fondo.mapa.datos[fila_pies][col_centro] != -1)
+        {
             k->y = (fila_pies * TILE_SIZE) - 64; // Lo sacamos del suelo
             k->velY = 0;
             k->enSuelo = true;
-            
-            // RESET DE ESTADO: Si estaba cayendo o saltando, vuelve a IDLE
-            if (k->estado == ST_JUMPING || k->estado == ST_FAT_FLYING) {
+
+            // Si estaba cayendo o saltando, vuelve a idle segun el estado de kirby
+            if (k->estado == ST_JUMPING)
+            {
                 k->estado = ST_IDLE;
             }
-        } else {
+            else if (k->estado == ST_FAT_FLYING)
+            {
+                k->estado = ST_FAT_IDLE;
+            }
+        }
+        else
+        {
             k->enSuelo = false;
         }
     }
 
-    // 2. COLISIÓN HORIZONTAL (Paredes)
-    // Revisamos un punto a la derecha o izquierda a la altura de la cintura
+    // Colisiones horizontales
     int direccion_x = (k->velX > 0) ? 40 : 10; // Margen según hacia donde mira
     int col_pared = (int)((k->x + direccion_x) / TILE_SIZE);
     int fila_cintura = (int)((k->y + 32) / TILE_SIZE);
 
-    if (col_pared >= 0 && col_pared < MAPA_ANCHO && fila_cintura >= 0 && fila_cintura < MAPA_ALTO) {
-        if (k->fondo.mapa.datos[fila_cintura][col_pared] != -1) {
-            // Si choca con pared, frenamos velocidad y ajustamos posición
+    if (col_pared >= 0 && col_pared < MAPA_ANCHO && fila_cintura >= 0 && fila_cintura < MAPA_ALTO)
+    {
+        if (k->fondo.mapa.datos[fila_cintura][col_pared] != -1)
+        {
             k->velX = 0;
-            if (direccion_x == 40) k->x = (col_pared * TILE_SIZE) - 41;
-            else k->x = (col_pared * TILE_SIZE) + TILE_SIZE + 1;
+            if (direccion_x == 40)
+                k->x = (col_pared * TILE_SIZE) - 41;
+            else
+                k->x = (col_pared * TILE_SIZE) + TILE_SIZE + 1;
         }
     }
+}
+
+int leer_record()
+{
+    FILE *archivo = fopen("highscore.dat", "r");
+    int record = 0;
+
+    if (archivo == NULL)
+        return 0; // Si no hay archivo la puntuacion maxima es cero
+
+    fscanf(archivo, "%d", &record);
+    fclose(archivo);
+    return record;
+}
+
+void guardar_record(int puntos_actuales)
+{
+    int record_viejo = leer_record();
+
+    if (puntos_actuales > record_viejo)
+    {
+        FILE *archivo = fopen("highscore.dat", "w");
+        if (archivo != NULL)
+        {
+            fprintf(archivo, "%d", puntos_actuales);
+            fclose(archivo);
+        }
+    }
+}
+
+bool verificar_colision_entidades(Kirby *k, Enemigo *e)
+{
+    if (!e->activo)
+        return false;
+
+    return (k->x < e->x + 40 &&
+            k->x + 40 > e->x &&
+            k->y < e->y + 40 &&
+            k->y + 40 > e->y);
+}
+
+void actualizar_enemigo(Enemigo *e, Mapa *m, float dt) {
+    if (!e->activo) return;
+
+    e->velY += 15.0f; // Gravedad constante
+    e->y += e->velY * dt;
+
+    //Colision con el suelo
+    int col = (int)((e->x + 20) / TILE_SIZE);
+    int fila_pies = (int)((e->y + 40) / TILE_SIZE);
+
+    if (m->datos[fila_pies][col] != -1) {
+        e->y = (fila_pies * TILE_SIZE) - 40;
+        e->velY = 0;
+    }
+
+    e->x += (e->direccion * 100.0f) * dt; 
+
+    //Evitar que se salga o que se caiga
+    int col_adelante = (int)((e->x + (e->direccion == 1 ? 45 : -5)) / TILE_SIZE);
+    
+    // Si choca con pared o detecta que el siguiente bloque es aire (-1)
+    if (m->datos[fila_pies - 1][col_adelante] != -1 || m->datos[fila_pies][col_adelante] == -1) {
+        e->direccion *= -1; // Da la vuelta
+    }
+}
+
+void generar_enemigo(Enemigo lista_enemigos[15],int index, float x, float y, int tipo) {
+    lista_enemigos[index].x = x;
+    lista_enemigos[index].y = y;
+    lista_enemigos[index].tipo = tipo;
+    lista_enemigos[index].direccion = -1;
+    lista_enemigos[index].activo = true;
+    lista_enemigos[index].velY = 0;
 }
