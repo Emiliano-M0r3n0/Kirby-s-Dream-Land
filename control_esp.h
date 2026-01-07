@@ -65,6 +65,17 @@
 #define GRAVEDAD 1200.0f
 #define DT (1.0f / 60.0f)
 
+//Constantes para el escalado del mapa
+#define MAPA_ANCHO 258  //Numero de columnas
+#define MAPA_ALTO 19    //Numero de filas
+#define TILE_SIZE 32    //Tamaño del sprite
+
+typedef struct Mapa{
+
+    int datos[MAPA_ALTO][MAPA_ANCHO];
+
+}Mapa;
+
 /// @brief Estructura que define la cajita conocida como hitbox
 typedef struct Hitbox
 {
@@ -72,7 +83,14 @@ typedef struct Hitbox
     float height, width;
 } Hitbox;
 
-typedef struct Fondos {
+typedef struct Obstaculos
+{
+    Hitbox box;
+    bool es_suelo;
+}Obstaculos;
+
+typedef struct Fondos
+{
     Imagen *img[FO_COUNT];
     int alto_original[FO_COUNT];
     int ancho_original[FO_COUNT];
@@ -80,6 +98,8 @@ typedef struct Fondos {
     float ancho_escalado[FO_COUNT];
     float alto_escalado[FO_COUNT];
     bool cargado[FO_COUNT];
+    Mapa mapa;
+
 } Fondos;
 
 /// @brief Estructura utilizada para encapsular las lecturas del joystick
@@ -137,7 +157,8 @@ typedef struct Animacion
 typedef struct Proyectil
 {
 
-    float x, y;      // Posición
+    float x, y; // Posición
+    int screenX, screenY;
     float velX;      // Velocidad horizontal
     bool activo;     // Si está activo en pantalla
     bool esEstrella; // true = estrella, false = humo
@@ -164,6 +185,7 @@ typedef struct Kirby
     float timerAccion;
     // Posicion y velocidades
     float x, y;
+    int screenX, screenY;
     float velX, velY;
     int estado;
     bool mirandoDerecha;
@@ -186,6 +208,7 @@ typedef struct Kirby
     Fondos fondo;
     bool stomach_wenemie; // Estomago con enemigo
     bool Gordito;         // Gordito o no gordito
+    bool enSuelo;
     int enemies_eaten;    // Numero de enemigos que ha comido
 
 } Kirby;
@@ -194,6 +217,7 @@ typedef struct Kirby
 typedef struct Enemigo
 {
     float x, y;
+    int screenX, screenY;
     Hitbox hitbox;
     Animacion arregloEnemies[EN_COUNT];
     Animacion *animActual;
@@ -250,6 +274,10 @@ Imagen *animacion_actual(Animacion *anim);
 /// @param delay_frames Numero de frames de delay
 /// @param anim Estructura en la que se guardara
 void cargar_animacion(const char **rutas_img, const char **rutas_mask, int total_frames, int delay_frames, Animacion *anim);
+
+void ini_camara(Camara *cam, float pantallaAncho, float pantallaAlto, float fondoAncho, float fondoAlto);
+
+void centrar_cam_kirby(Kirby *kirby);
 
 /// @brief Detecta la colision entre dos hitbox
 /// @param a Hitbox a
@@ -313,11 +341,18 @@ void crear_fondos(Fondos *fondos, const char **rutas_fondos);
 
 /// @brief Crea y actualiza las escalas y medidas de los fondos
 /// @param fondos Direccion de la variable fondos
-void crear_escalas_fondos(Fondos *fondos);
+/// @param alto Determina si es el escalado se hara con el alto o el ancho de la imagen (true es que se hara con el alto)
+void crear_escalas_fondos(Fondos *fondos, bool alto);
 
 /// @brief Dibujar el fondo con la escala pertinente
 /// @param fondo Direccion de la variable fondo
 /// @param indice Fondo que quieres imprimir
-void dibujar_fondo(Fondos *fondo,int indice);
+void dibujar_fondo(Kirby *kirby, int indice, bool fs);
+
+void calc_pos_pantalla(Kirby *k, Enemigo *e);
+
+void cargar_colisiones(Mapa *m,const char *ruta);
+
+void aplicar_colisiones(Kirby *k);
 
 #endif

@@ -14,6 +14,7 @@
 #include "serial.h"
 #include "simplecontroller.h"
 #include "control_esp.h"
+#include "sonidos.h"
 #include "kirby_assets.h"
 #include <stdlib.h>
 #include <stdbool.h>
@@ -45,6 +46,7 @@ int main()
 
     Enemigo enemies;
 
+    //Cargar animaciones de kirby/enemigos y fondos
     cargar_all_fondos(&kirby.fondo);
 
     cargar_animaciones_enemies(&enemies);
@@ -53,8 +55,12 @@ int main()
 
     cargar_animacionesmirror_kirby(&kirby);
 
-    ini_kirby(&kirby, 100, ventana.altoVentana() - 50);
+    cargar_colisiones(&kirby.fondo.mapa,"Fondos_tiled/ATiled.csv");
 
+    //inicializar variable kirby
+    ini_kirby(&kirby, 100, ventana.altoVentana() - 150);
+
+    //inicializar variable enemies
     enemies.x = 400.0f;
     enemies.y = ventana.altoVentana() - 50.0f;
     enemies.activo = true;
@@ -73,12 +79,10 @@ int main()
     esp32->pinMode(esp32, BUTTON_DOWN, INPUT_PULLUP);
 
     EjeJoystick EjeX;
-    EjeJoystick EjeY;
 
     Lectura lectura_general;
 
     ini_joystick(&EjeX, esp32, JX);
-    ini_joystick(&EjeY, esp32, JY);
 
     ini_lens(&lectura_general, esp32, BUTTON_ACTION, BUTTON_JUMP, BUTTON_DOWN, MTR);
 
@@ -88,11 +92,11 @@ int main()
     ventana.espera(100);
 
     ini_calibracion(&EjeX, 500);
-    ini_calibracion(&EjeY, 500);
 
-    crear_escalas_fondos(&kirby.fondo);
 
     Animacion *anim_act;
+
+    ini_camara(&kirby.camara,(float)ventana.anchoVentana(),(float)ventana.altoVentana(),kirby.fondo.ancho_original[FO_A],kirby.fondo.alto_original[FO_A]);
 
     while (1)
     {
@@ -101,18 +105,21 @@ int main()
         {
             fullscreen = !fullscreen;
             ventana.pantallaCompleta(fullscreen);
-            crear_escalas_fondos(&kirby.fondo);
+            crear_escalas_fondos(&kirby.fondo,true);
         }
 
         static bool last_mtr = false;
 
         leer_entrada(&lectura_general, &EjeX, false);
-
+        
         kirby.action_p = fue_presionado(&lectura_general.button_action, lectura_general.board);
-
         kirby.jump_p = fue_presionado(&lectura_general.button_jump, lectura_general.board);
 
         actualizar_kirby(&kirby, &lectura_general, DT, ventana.anchoVentana(), ventana.altoVentana());
+
+        centrar_cam_kirby(&kirby);
+
+        aplicar_colisiones(&kirby);
 
         if (kirby.estado == ST_INHALE && enemies.activo)
         {
@@ -134,7 +141,6 @@ int main()
         }
 
         seleccionar_animacion_kirby(&kirby);
-
         sprite = animacion_actual(kirby.animActual);
 
         actualizar_proyectil(&kirby.proyectil, DT);
@@ -156,26 +162,29 @@ int main()
             }
         }
 
+        //Calcular la nuevas posiciones de los objetos en la pantalla
+        calc_pos_pantalla(&kirby,&enemies);
+
         // Dibujo
         ventana.limpiaVentana();
-        dibujar_fondo(&kirby.fondo,FO_A);
+        dibujar_fondo(&kirby,FO_A,fullscreen);
         if (enemies.activo)
         {
-            ventana.muestraImagenEscalada((int)enemies.x, (int)enemies.y, ESCALA, ESCALA, animacion_actual(enemies.animActual));
+            ventana.muestraImagenEscalada(enemies.screenX, enemies.screenY, ESCALA, ESCALA, animacion_actual(enemies.animActual));
         }
         if (kirby.proyectil.activo)
         {
             seleccionar_proyectil(&kirby);
             if (kirby.proyectil.esEstrella)
             {
-                ventana.muestraImagenEscalada((int)kirby.proyectil.x, kirby.proyectil.y, ESCALA - 35, ESCALA - 35, animacion_actual(kirby.proyectil.animActual));
+                ventana.muestraImagenEscalada(kirby.proyectil.screenX,kirby.proyectil.screenY, ESCALA - 35, ESCALA - 35, animacion_actual(kirby.proyectil.animActual));
             }
             else
             {
-                ventana.muestraImagenEscalada((int)kirby.proyectil.x, kirby.proyectil.y, ESCALA - 25, ESCALA - 25, animacion_actual(kirby.proyectil.animActual));
+                ventana.muestraImagenEscalada(kirby.proyectil.screenX, kirby.proyectil.screenY, ESCALA - 25, ESCALA - 25, animacion_actual(kirby.proyectil.animActual));
             }
         }
-        ventana.muestraImagenEscalada((int)kirby.x, (int)kirby.y, ESCALA, ESCALA, sprite);
+        ventana.muestraImagenEscalada(kirby.screenX,kirby.screenY, ESCALA, ESCALA, sprite);
         ventana.actualizaVentana();
         ventana.espera(16);
     }

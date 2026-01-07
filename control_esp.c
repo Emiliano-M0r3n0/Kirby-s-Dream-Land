@@ -1,6 +1,12 @@
 #include "control_esp.h"
 #include "graficos.h"
+#include "sonidos.h"
 #include <math.h>
+#include <stdio.h>
+#include <windows.h>
+#include <mmsystem.h>
+#define PLAY(file) PlaySound(TEXT(file), NULL, SND_FILENAME | SND_ASYNC)
+#pragma comment(lib, "winmm.lib")
 
 void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin)
 {
@@ -12,7 +18,7 @@ void ini_joystick(EjeJoystick *Eje, Board *board, uint8_t pin)
 void ini_calibracion(EjeJoystick *Eje, int muestras)
 {
     float suma = 0.0f;
-    ventana.texto((ventana.anchoVentana() / 2)-150, ventana.altoVentana() / 2, "Calibrando Joystick...");
+    ventana.texto((ventana.anchoVentana() / 2) - 150, ventana.altoVentana() / 2, "Calibrando Joystick...");
     ventana.actualizaVentana();
 
     for (int i = 0; i < muestras; i++)
@@ -128,29 +134,23 @@ void ini_camara(Camara *cam, float pantallaAncho, float pantallaAlto, float fond
     cam->fondo_height = fondoAlto;
 }
 
-void centrar_cam_kirby(Camara *cam, Kirby *kirby)
+void centrar_cam_kirby(Kirby *kirby)
 {
-    float targetX = kirby->x - cam->width / 2 + 32; // Los 32 son para centrar la pantalla en base a los 65 pixeles de kirby
-    float targetY = kirby->y - cam->height / 2 + 32;
+    float targetX = kirby->x - kirby->camara.width / 2 + 32; // Los 32 son para centrar la pantalla en base a los 65 pixeles de kirby
+    float targetY = kirby->y - kirby->camara.height / 2 + 32;
 
     // Limitar para no salir de los bordes del fondo
     if (targetX < 0)
         targetX = 0;
-    if (targetX > cam->fondo_width - cam->width)
-        targetX = cam->fondo_width - cam->width;
+    if (targetX > kirby->camara.fondo_width - kirby->camara.width)
+        targetX = kirby->camara.fondo_width - kirby->camara.width;
     if (targetY < 0)
         targetY = 0;
-    if (targetY > cam->fondo_height - cam->height)
-        targetY = cam->fondo_height - cam->height;
+    if (targetY > kirby->camara.fondo_height - kirby->camara.height)
+        targetY = kirby->camara.fondo_height - kirby->camara.height;
 
-    cam->x = targetX;
-    cam->y = targetY;
-}
-
-void fondo_a_pantalla(Camara *cam, float fondoX, float fondoY, float *pantallaX, float *pantallaY)
-{
-    *pantallaX = fondoX - cam->x;
-    *pantallaY = fondoY - cam->y;
+    kirby->camara.x = targetX;
+    kirby->camara.y = targetY;
 }
 
 bool hitbox_colision(Hitbox a, Hitbox b)
@@ -286,6 +286,8 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
     else if (input->lensX < -0.1f)
         k->mirandoDerecha = false;
 
+    float multiplicador = k->mirandoDerecha ? 700.0f : 400.0f;
+
     switch (k->estado)
     {
 
@@ -308,7 +310,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         break;
 
     case ST_WALKING:
-        k->velX = input->lensX * 400.0f;
+        k->velX = input->lensX * multiplicador;
         k->velY += GRAVEDAD * dt;
         if (fabs(input->lensX) <= 0.1f)
             k->estado = ST_IDLE;
@@ -326,7 +328,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         break;
 
     case ST_JUMPING:
-        k->velX = input->lensX * 400.0f;
+        k->velX = input->lensX * multiplicador;
         k->velY += 1200.0f * dt; // Gravedad normal
         if (k->y >= altoVentana - 70)
         {
@@ -384,7 +386,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         break;
 
     case ST_FAT_WALKING:
-        k->velX = input->lensX * 400.0f;
+        k->velX = input->lensX * multiplicador;
         k->velY += (GRAVEDAD * 0.2f) * dt;
         if (fabs(input->lensX) <= 0.1f)
             k->estado = ST_FAT_IDLE;
@@ -401,7 +403,7 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         break;
 
     case ST_FAT_FLYING:
-        k->velX = input->lensX * 400.0f;
+        k->velX = input->lensX * multiplicador;
         k->velY += (1200.0f * 0.3f) * dt; // Gravedad reducida (flota)
         if (k->jump_p)
             k->velY = -300.0f;
@@ -445,8 +447,8 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
 
     if (k->x < 0)
         k->x = 0;
-    if (k->x > anchoVentana - 64)
-        k->x = anchoVentana - 64;
+    if (k->x > k->camara.fondo_width - 64)
+        k->x = k->camara.fondo_width - 64;
     if (k->y > altoVentana - 70)
         k->y = altoVentana - 70;
     if (k->y < 60)
@@ -521,46 +523,133 @@ void seleccionar_proyectil(Kirby *kirby)
     }
 }
 
-void crear_fondos(Fondos *fondos, const char **rutas_fondos) {
-    for (int i = 0; i < FO_COUNT; i++) {
+void crear_fondos(Fondos *fondos, const char **rutas_fondos)
+{
+    for (int i = 0; i < FO_COUNT; i++)
+    {
         fondos->img[i] = ventana.creaImagen(rutas_fondos[i]);
-        
-        if (fondos->img[i]) {
+
+        if (fondos->img[i])
+        {
             fondos->alto_original[i] = ventana.altoImagen(fondos->img[i]);
             fondos->ancho_original[i] = ventana.anchoImagen(fondos->img[i]);
             fondos->cargado[i] = true;
-        } else {
+        }
+        else
+        {
             fondos->cargado[i] = false;
         }
     }
 }
 
-void crear_escalas_fondos(Fondos *fondos) {
+void crear_escalas_fondos(Fondos *fondos, bool alto)
+{
     int alto_ventana = ventana.altoVentana();
-    
-    for (int i = 0; i < FO_COUNT; i++) {
-        if (!fondos->cargado[i] || fondos->alto_original[i] == 0) {
+    int ancho_ventana = ventana.anchoVentana();
+
+    for (int i = 0; i < FO_COUNT; i++)
+    {
+        if (!fondos->cargado[i] || fondos->alto_original[i] == 0)
+        {
             fondos->escalas[i] = 1.0f;
             fondos->alto_escalado[i] = 0;
             fondos->ancho_escalado[i] = 0;
             continue;
         }
-        
-        fondos->escalas[i] = (float)alto_ventana / (float)fondos->alto_original[i];
+        if (alto)
+        {
+            fondos->escalas[i] = (float)alto_ventana / (float)fondos->alto_original[i];
+        }
+        else if (!alto)
+        {
+            fondos->escalas[i] = (float)ancho_ventana / (float)fondos->ancho_original[i];
+        }
         fondos->alto_escalado[i] = fondos->escalas[i] * fondos->alto_original[i];
         fondos->ancho_escalado[i] = fondos->escalas[i] * fondos->ancho_original[i];
-        
     }
 }
 
-void dibujar_fondo(Fondos *fondos, int indice) {
-    if (indice < 0 || indice >= FO_COUNT) return;
+void dibujar_fondo(Kirby *kirby, int indice, bool fs)
+{
+    if (indice < 0 || indice >= FO_COUNT)
+        return;
+    if (!kirby->fondo.cargado[indice] || kirby->fondo.img[indice] == NULL)
+        return;
+
+    int x_pantalla = (int)(-kirby->camara.x);
+    int y_pantalla = (int)(-kirby->camara.y);
+
+    if (fs)
+    {
+        ventana.muestraImagenEscalada(x_pantalla, y_pantalla,
+                                      (int)kirby->fondo.ancho_escalado[indice],
+                                      (int)kirby->fondo.alto_escalado[indice],
+                                      kirby->fondo.img[indice]);
+    }
+    else
+    {
+        ventana.muestraImagen(x_pantalla, y_pantalla, kirby->fondo.img[indice]);
+    }
+}
+
+void calc_pos_pantalla(Kirby *k, Enemigo *e) {
+    k->screenX = (int)(k->x - k->camara.x);
+    k->screenY = (int)(k->y - k->camara.y);
     
-    if (!fondos->cargado[indice] || fondos->img[indice] == NULL) return;
+    if (e->activo) {
+        e->screenX = (int)(e->x - k->camara.x);
+        e->screenY = (int)(e->y - k->camara.y);
+    }
     
-    // Dibujar
-    ventana.muestraImagenEscalada(0, 0,
-                                 (int)fondos->ancho_escalado[indice],
-                                 (int)fondos->alto_escalado[indice],
-                                 fondos->img[indice]);
+    if (k->proyectil.activo) {
+        k->proyectil.screenX = (int)(k->proyectil.x - k->camara.x);
+        k->proyectil.screenY = (int)(k->proyectil.y - k->camara.y);
+    }
+}
+
+void cargar_colisiones(Mapa *m,const char *ruta)
+{
+FILE *file = fopen(ruta, "r"); 
+    if (!file) return;
+    for (int i = 0; i < MAPA_ALTO; i++) {
+        for (int j = 0; j < MAPA_ANCHO; j++) {
+            if (fscanf(file, "%d,", &m->datos[i][j]) == EOF) break;
+        }
+    }
+    fclose(file);
+}
+
+void aplicar_colisiones(Kirby *k) {
+// 1. COLISIÓN VERTICAL (Pies y Techo)
+    int col_centro = (int)((k->x + 32) / TILE_SIZE);
+    int fila_pies = (int)((k->y + 64) / TILE_SIZE);
+    if (col_centro >= 0 && col_centro < MAPA_ANCHO && fila_pies >= 0 && fila_pies < MAPA_ALTO) {
+        if (k->fondo.mapa.datos[fila_pies][col_centro] != -1) {
+            k->y = (fila_pies * TILE_SIZE) - 64; // Lo sacamos del suelo
+            k->velY = 0;
+            k->enSuelo = true;
+            
+            // RESET DE ESTADO: Si estaba cayendo o saltando, vuelve a IDLE
+            if (k->estado == ST_JUMPING || k->estado == ST_FAT_FLYING) {
+                k->estado = ST_IDLE;
+            }
+        } else {
+            k->enSuelo = false;
+        }
+    }
+
+    // 2. COLISIÓN HORIZONTAL (Paredes)
+    // Revisamos un punto a la derecha o izquierda a la altura de la cintura
+    int direccion_x = (k->velX > 0) ? 40 : 10; // Margen según hacia donde mira
+    int col_pared = (int)((k->x + direccion_x) / TILE_SIZE);
+    int fila_cintura = (int)((k->y + 32) / TILE_SIZE);
+
+    if (col_pared >= 0 && col_pared < MAPA_ANCHO && fila_cintura >= 0 && fila_cintura < MAPA_ALTO) {
+        if (k->fondo.mapa.datos[fila_cintura][col_pared] != -1) {
+            // Si choca con pared, frenamos velocidad y ajustamos posición
+            k->velX = 0;
+            if (direccion_x == 40) k->x = (col_pared * TILE_SIZE) - 41;
+            else k->x = (col_pared * TILE_SIZE) + TILE_SIZE + 1;
+        }
+    }
 }

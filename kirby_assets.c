@@ -131,7 +131,7 @@ void cargar_animaciones_kirby(Kirby *k)
     k->arregloAnim[AN_FAT_WALK].bucle = true;
 
     cargar_animacion(kirbyfatair_walk_r, kirbyfatair_walk_r_mask, 2, 7, &k->arregloAnim[AN_FLY]);
-    k->arregloAnim[AN_FLY].bucle = false;
+    k->arregloAnim[AN_FLY].bucle = true;
 
     cargar_animacion(kirby_spit_r, kirby_spit_r_mask, 3, 8, &k->arregloAnim[AN_SPIT]);
     k->arregloAnim[AN_SPIT].bucle = false;
@@ -382,10 +382,10 @@ void cargar_animaciones_enemies(Enemigo *enemies)
 void cargar_all_fondos(Fondos *fondos)
 {
     static const char *rutas_fondos[] = {
-        "Escenarios/fondoA.bmp",
+        "Escenarios/A.bmp",
         "Escenarios/B.bmp",
         "Escenarios/C.bmp",
-        "Escenarios/C.bmp",
+        "Escenarios/D.bmp",
         "Escenarios/Aa.bmp"};
 
     crear_fondos(fondos,rutas_fondos);
