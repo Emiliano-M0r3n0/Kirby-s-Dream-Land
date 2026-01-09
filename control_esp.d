@@ -272,4 +272,8 @@ control_esp.o: control_esp.c control_esp.h simplecontroller.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/stdio_s.h graficos.h \
  C:/Strawberry/c/lib/gcc/x86_64-w64-mingw32/13.1.0/include/stdint.h \
  C:/Strawberry/c/x86_64-w64-mingw32/include/stdint.h sonidos.h \
- C:/Strawberry/c/x86_64-w64-mingw32/include/math.h
+ C:/Strawberry/c/x86_64-w64-mingw32/include/math.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/time.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/sys/timeb.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/sec_api/sys/timeb_s.h \
+ C:/Strawberry/c/x86_64-w64-mingw32/include/pthread_time.h

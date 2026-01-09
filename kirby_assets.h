@@ -12,7 +12,7 @@ void cargar_animaciones_kirby(Kirby *k);
 /// @param k Direccion de la variable kirby donde se guardaran las direcciones de memoria
 void cargar_animacionesmirror_kirby(Kirby *k);
 
-void cargar_animaciones_enemies(Enemigo *enemies);
+void cargar_animaciones_enemies(HordaEnemigos *horda);
 
 void cargar_all_fondos(Fondos *fondos);
 

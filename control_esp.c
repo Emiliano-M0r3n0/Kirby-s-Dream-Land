@@ -2,6 +2,7 @@
 #include "graficos.h"
 #include "sonidos.h"
 #include <math.h>
+#include <time.h>
 #include <stdio.h>
 #include <windows.h>
 #include <mmsystem.h>
@@ -177,8 +178,8 @@ void actualizar_hitbox_kirby(Kirby *k)
 
 void actualizar_hitbox_succion(Kirby *k)
 {
-    float length_inhale = 60.0f; // Alcance horizontal de la succion
-    float height_inhale = 25.0f; // Alcance vertical de la succion
+    float length_inhale = 220.0f; // Alcance horizontal de la succion
+    float height_inhale = 25.0f;  // Alcance vertical de la succion
     float posBoca = 25.0f;
 
     k->succionhitbox.y = k->y + posBoca - (height_inhale / 2);
@@ -261,6 +262,7 @@ void ini_kirby(Kirby *k, float x, float y)
     k->animActual = &k->arregloAnim[AN_IDLE]; // Se asignará en el primer frame
     k->jump_p = false;
     k->action_p = false;
+    k->puntos = 0;
 
     k->enemies_eaten = 0;
     k->Gordito = false;
@@ -449,8 +451,8 @@ void actualizar_kirby(Kirby *k, Lectura *input, float dt, int anchoVentana, int 
         k->x = 0;
     if (k->x > k->camara.fondo_width - 64)
         k->x = k->camara.fondo_width - 64;
-    if (k->y > altoVentana - 70)
-        k->y = altoVentana - 70;
+    if (k->y > altoVentana - 50)
+        k->y = altoVentana - 50;
     if (k->y < 60)
         k->y = 60;
 }
@@ -498,10 +500,10 @@ void seleccionar_animacion_kirby(Kirby *k)
     }
 }
 
-void seleccionar_enemies(Enemigo *enemies)
+void seleccionar_enemies(HordaEnemigos *horda, int iteracion)
 {
-    int indice = enemies->typeenemie;
-    enemies->animActual = &enemies->arregloEnemies[indice];
+    int indice = horda->enemigo[iteracion].typeenemie;
+    horda->enemigo[iteracion].animActual = &horda->arregloAnimEnemies[indice];
 }
 
 void seleccionar_proyectil(Kirby *kirby)
@@ -523,6 +525,8 @@ void seleccionar_proyectil(Kirby *kirby)
     }
 }
 
+//-------------------Funciones para la creacion y seleccion de fondos---------------------
+
 void crear_fondos(Fondos *fondos, const char **rutas_fondos)
 {
     for (int i = 0; i < FO_COUNT; i++)
@@ -538,6 +542,8 @@ void crear_fondos(Fondos *fondos, const char **rutas_fondos)
         else
         {
             fondos->cargado[i] = false;
+            fondos->alto_original[i] = 1; 
+            fondos->ancho_original[i] = 1;
         }
     }
 }
@@ -552,8 +558,6 @@ void crear_escalas_fondos(Fondos *fondos, bool alto)
         if (!fondos->cargado[i] || fondos->alto_original[i] == 0)
         {
             fondos->escalas[i] = 1.0f;
-            fondos->alto_escalado[i] = 0;
-            fondos->ancho_escalado[i] = 0;
             continue;
         }
         if (alto)
@@ -610,6 +614,8 @@ void calc_pos_pantalla(Kirby *k, Enemigo *e)
     }
 }
 
+//-------------Funciones para las colisiones de Kirby con el Fondo----------------------
+
 void cargar_colisiones(Mapa *m, const char *ruta)
 {
     FILE *file = fopen(ruta, "r");
@@ -639,7 +645,7 @@ void aplicar_colisiones(Kirby *k)
             k->velY = 0;
             k->enSuelo = true;
 
-            // Si estaba cayendo o saltando, vuelve a idle segun el estado de kirby
+            // Si estaba cayendo o saltando, vuelve a idle segun el estado anterior de kirby
             if (k->estado == ST_JUMPING)
             {
                 k->estado = ST_IDLE;
@@ -656,7 +662,7 @@ void aplicar_colisiones(Kirby *k)
     }
 
     // Colisiones horizontales
-    int direccion_x = (k->velX > 0) ? 40 : 10; // Margen según hacia donde mira
+    int direccion_x = (k->velX > 0) ? 40 : 10; // Margen segun hacia donde mira
     int col_pared = (int)((k->x + direccion_x) / TILE_SIZE);
     int fila_cintura = (int)((k->y + 32) / TILE_SIZE);
 
@@ -672,6 +678,8 @@ void aplicar_colisiones(Kirby *k)
         }
     }
 }
+
+//---------------Funciones para leer records------------------
 
 int leer_record()
 {
@@ -692,7 +700,7 @@ void guardar_record(int puntos_actuales)
 
     if (puntos_actuales > record_viejo)
     {
-        FILE *archivo = fopen("highscore.dat", "w");
+        FILE *archivo = fopen("puntajes.p", "w");
         if (archivo != NULL)
         {
             fprintf(archivo, "%d", puntos_actuales);
@@ -701,48 +709,94 @@ void guardar_record(int puntos_actuales)
     }
 }
 
-bool verificar_colision_entidades(Kirby *k, Enemigo *e)
-{
-    if (!e->activo)
-        return false;
+//---------Funciones para enemigos----------
 
-    return (k->x < e->x + 40 &&
-            k->x + 40 > e->x &&
-            k->y < e->y + 40 &&
-            k->y + 40 > e->y);
+void inicializar_enemigos(HordaEnemigos *horda)
+{
+    horda->enemigosactivos = 0;
+    for (int i = 0; i < MAX_ENEMIGOS; i++)
+        horda->enemigo[i].activo = false;
 }
 
-void actualizar_enemigo(Enemigo *e, Mapa *m, float dt) {
-    if (!e->activo) return;
+void generar_enemigo(HordaEnemigos *horda)
+{
+    int posX[MAX_ENEMIGOS] = {760, 970, 1000, 1200, 1540, 1700, 1940, 2120, 2400, 2700, 3040, 3830, 4600, 5200};
+    int posY[MAX_ENEMIGOS] = {450, 450, 450, 450, 370, 370, 370, 450, 450, 140, 450, 290, 450, 450};
+    int indice = rand() % 14;
+    if (horda->enemigosactivos < MAX_ENEMIGOS)
+    {
+        for (int i = 0; i < MAX_ENEMIGOS; i++)
+        {
+            if (!horda->enemigo[i].activo)
+            {
+                horda->enemigo[i].x = posX[indice];
+                horda->enemigo[i].y = posY[indice];
+                horda->enemigo[i].typeenemie = rand() % 7;
+                horda->enemigo[i].direccion = -1;
+                horda->enemigo[i].velY = 0;
+                horda->enemigo[i].activo = true;
+                horda->enemigosactivos++;
+                break;
+            }
+        }
+    }
+}
+
+void actualizar_enemigo(Enemigo *e, Mapa *m, float dt)
+{
+    if (!e->activo)
+        return;
 
     e->velY += 15.0f; // Gravedad constante
     e->y += e->velY * dt;
 
-    //Colision con el suelo
-    int col = (int)((e->x + 20) / TILE_SIZE);
-    int fila_pies = (int)((e->y + 40) / TILE_SIZE);
+    // Colision con el suelo
+    int col = (int)((e->x + 15) / TILE_SIZE);
+    int fila_pies = (int)((e->y + 30) / TILE_SIZE);
 
-    if (m->datos[fila_pies][col] != -1) {
-        e->y = (fila_pies * TILE_SIZE) - 40;
+    if (m->datos[fila_pies][col] != -1)
+    {
+        e->y = (fila_pies * TILE_SIZE) - 30;
         e->velY = 0;
     }
 
-    e->x += (e->direccion * 100.0f) * dt; 
+    e->x += (e->direccion * 100.0f) * dt;
 
-    //Evitar que se salga o que se caiga
+    // Evitar que se se salga de los margenes
     int col_adelante = (int)((e->x + (e->direccion == 1 ? 45 : -5)) / TILE_SIZE);
-    
+
     // Si choca con pared o detecta que el siguiente bloque es aire (-1)
-    if (m->datos[fila_pies - 1][col_adelante] != -1 || m->datos[fila_pies][col_adelante] == -1) {
+    if (m->datos[fila_pies - 1][col_adelante] != -1 || m->datos[fila_pies][col_adelante] == -1)
+    {
         e->direccion *= -1; // Da la vuelta
     }
 }
 
-void generar_enemigo(Enemigo lista_enemigos[15],int index, float x, float y, int tipo) {
-    lista_enemigos[index].x = x;
-    lista_enemigos[index].y = y;
-    lista_enemigos[index].tipo = tipo;
-    lista_enemigos[index].direccion = -1;
-    lista_enemigos[index].activo = true;
-    lista_enemigos[index].velY = 0;
+void puntos_enemigo(Kirby *k, int tipo_enemigo)
+{
+    switch (tipo_enemigo)
+    {
+    case EN_BRONTO:
+        k->puntos += PTS_BRONTO;
+        break;
+
+    case EN_CAPPY:
+        k->puntos += PTS_CAPPY;
+        break;
+    case EN_GRIZZO:
+        k->puntos += PTS_GRIZZO;
+        break;
+    case EN_POPPY:
+        k->puntos += PTS_POPPY;
+        break;
+    case EN_TWIZZY:
+        k->puntos += PTS_TWIZZY;
+        break;
+    case EN_WADLE:
+        k->puntos += PTS_WADLE;
+        break;
+    default:
+        k->puntos += 25;
+        break;
+    }
 }

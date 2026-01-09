@@ -293,7 +293,7 @@ void cargar_animacionesmirror_kirby(Kirby *k)
     k->proyectil.arregloProyectilMirror[1].bucle = true;
 }
 
-void cargar_animaciones_enemies(Enemigo *enemies)
+void cargar_animaciones_enemies(HordaEnemigos *horda)
 {
     static const char *bronto_walk[] = {
         "Enemigos/Bronto.bmp",
@@ -357,26 +357,26 @@ void cargar_animaciones_enemies(Enemigo *enemies)
         "Enemigos/WadleDeemask.bmp",
         "Enemigos/WadleDee2mask.bmp"};
 
-    cargar_animacion(bronto_walk, bronto_walk_mask, 2, 3, &enemies->arregloEnemies[EN_BRONTO]);
-    enemies->arregloEnemies[EN_BRONTO].bucle = true;
+    cargar_animacion(bronto_walk, bronto_walk_mask, 2, 3,&horda->arregloAnimEnemies[EN_BRONTO]);
+    horda->arregloAnimEnemies[EN_BRONTO].bucle = true;
 
-    cargar_animacion(cappy_walk, cappy_walk_mask, 3, 4, &enemies->arregloEnemies[EN_CAPPY]);
-    enemies->arregloEnemies[EN_CAPPY].bucle = true;
+    cargar_animacion(cappy_walk, cappy_walk_mask, 3, 4, &horda->arregloAnimEnemies[EN_CAPPY]);
+    horda->arregloAnimEnemies[EN_CAPPY].bucle = true;
 
-    cargar_animacion(grizzo, grizzo_mask, 2, 3, &enemies->arregloEnemies[EN_GRIZZO]);
-    enemies->arregloEnemies[EN_GRIZZO].bucle = true;
+    cargar_animacion(grizzo, grizzo_mask, 2, 3, &horda->arregloAnimEnemies[EN_GRIZZO]);
+    horda->arregloAnimEnemies[EN_GRIZZO].bucle = true;
 
-    cargar_animacion(manzana, manzana_mask, 4, 6, &enemies->arregloEnemies[EN_MANZANA]);
-    enemies->arregloEnemies[EN_MANZANA].bucle = true;
+    cargar_animacion(manzana, manzana_mask, 4, 6, &horda->arregloAnimEnemies[EN_MANZANA]);
+    horda->arregloAnimEnemies[EN_MANZANA].bucle = true;
 
-    cargar_animacion(poppybros, poppybros_mask, 2, 3, &enemies->arregloEnemies[EN_POPPY]);
-    enemies->arregloEnemies[EN_POPPY].bucle = true;
+    cargar_animacion(poppybros, poppybros_mask, 2, 3, &horda->arregloAnimEnemies[EN_POPPY]);
+    horda->arregloAnimEnemies[EN_POPPY].bucle = true;
 
-    cargar_animacion(twizzy, twizzy_mask, 2, 3, &enemies->arregloEnemies[EN_TWIZZY]);
-    enemies->arregloEnemies[EN_TWIZZY].bucle = true;
+    cargar_animacion(twizzy, twizzy_mask, 2, 3, &horda->arregloAnimEnemies[EN_TWIZZY]);
+    horda->arregloAnimEnemies[EN_TWIZZY].bucle = true;
 
-    cargar_animacion(wadledee, wadledee_mask, 2, 3, &enemies->arregloEnemies[EN_WADLE]);
-    enemies->arregloEnemies[EN_WADLE].bucle = true;
+    cargar_animacion(wadledee, wadledee_mask, 2, 3, &horda->arregloAnimEnemies[EN_WADLE]);
+    horda->arregloAnimEnemies[EN_WADLE].bucle = true;
 }
 
 void cargar_all_fondos(Fondos *fondos)

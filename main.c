@@ -18,6 +18,7 @@
 #include "kirby_assets.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include <math.h>
 
 // Pines para el ESP32
@@ -30,6 +31,7 @@
 
 int main()
 {
+    srand(time(NULL));
     // Elementos de puntuacion
     int puntos_partida = 0;
     int record_maximo = leer_record();
@@ -49,12 +51,16 @@ int main()
 
     Kirby kirby;
 
-    Enemigo enemies;
+    HordaEnemigos horda_1;
 
     // Cargar animaciones de kirby/enemigos y fondos
     cargar_all_fondos(&kirby.fondo);
 
-    cargar_animaciones_enemies(&enemies);
+    cargar_animaciones_enemies(&horda_1);
+
+    inicializar_enemigos(&horda_1);
+
+    generar_enemigo(&horda_1);
 
     cargar_animaciones_kirby(&kirby);
 
@@ -65,15 +71,6 @@ int main()
     // inicializar variable kirby
     ini_kirby(&kirby, 100, ventana.altoVentana() - 150);
 
-    // inicializar variable enemies
-    enemies.x = 400.0f;
-    enemies.y = ventana.altoVentana() - 50.0f;
-    enemies.activo = true;
-    enemies.typeenemie = EN_WADLE;
-
-    actualizar_hitbox_enemie(&enemies);
-
-    seleccionar_enemies(&enemies);
     // Configuraciones y calibraciones del Esp32
     Board *esp32 = connectDevice("COM6", B230400);
     esp32->pinMode(esp32, JX, INPUT);
@@ -125,30 +122,72 @@ int main()
 
         aplicar_colisiones(&kirby);
 
+        if (vidas_kirby <= 0)
+        {
+            guardar_record(kirby.puntos);
+        }
+        
         if (time_invincible > 0)
         {
             time_invincible -= DT;
-        }
-        else if (verificar_colision_entidades(&kirby, &enemies))
-        {
-            vidas_kirby--;
-            time_invincible = 2.0f; // 2 segundos de invulnerabilidad
-
-            if (vidas_kirby <= 0)
-            {
-                guardar_record(puntos_partida);
-            }
+            if (time_invincible <= 0)
+                lectura_general.mtr_on = false;
         }
 
-        if (kirby.estado == ST_INHALE && enemies.activo)
+        for (int i = 0; i < MAX_ENEMIGOS; i++)
         {
-            if (kirby.timerAccion >= 0.2f && kirby.timerAccion < 0.4f)
+            if (!horda_1.enemigo[i].activo)
+                continue;
+
+            // Solo procesar enemigos que están cerca de la pantalla (Culling para evitar LAG)
+            if (horda_1.enemigo[i].x > kirby.x - 600 && horda_1.enemigo[i].x < kirby.x + 600)
             {
-                if (hitbox_colision(kirby.succionhitbox, enemies.hitbox))
+
+                actualizar_enemigo(&horda_1.enemigo[i], &kirby.fondo.mapa, DT);
+                seleccionar_enemies(&horda_1,i);
+                actualizar_hitbox_enemie(&horda_1.enemigo[i]);
+                calc_pos_pantalla(&kirby, &horda_1.enemigo[i]);
+
+                // SUCCIÓN
+                if (kirby.estado == ST_INHALE)
                 {
-                    enemies.activo = false;
-                    kirby.stomach_wenemie = true;
-                    kirby.enemies_eaten++;
+                    actualizar_hitbox_succion(&kirby);
+                    if (hitbox_colision(kirby.succionhitbox, horda_1.enemigo[i].hitbox))
+                    {
+                        // Atracción
+                        horda_1.enemigo[i].x += (kirby.x - horda_1.enemigo[i].x) * DT * 5.0f;
+
+                        if (hitbox_colision(kirby.kirbyhitbox, horda_1.enemigo[i].hitbox)) //El enemigo esta cerca de kirby
+                        {
+                            horda_1.enemigo[i].activo = false;
+                            kirby.estado = ST_FAT_IDLE; // Kirby ahora está gordo
+                        }
+                    }
+                }
+
+                // Colision con el proyectil, sea humo o estrella
+                if (kirby.proyectil.activo && hitbox_colision(kirby.proyectil.hitbox, horda_1.enemigo[i].hitbox))
+                {
+                    if (kirby.proyectil.esEstrella)
+                    {
+                        horda_1.enemigo[i].activo = false; // La estrella mata
+                        kirby.proyectil.activo = false;
+                        puntos_enemigo(&kirby,horda_1.enemigo[i].typeenemie);
+                    }
+                    else
+                    {
+                        // El humo solo empuja
+                        horda_1.enemigo[i].x += (kirby.proyectil.velX > 0) ? 50 : -50;
+                        kirby.proyectil.activo = false;
+                    }
+                }
+
+                // DAÑO A KIRBY
+                if (time_invincible <= 0 && hitbox_colision(kirby.kirbyhitbox, horda_1.enemigo[i].hitbox))
+                {
+                    vidas_kirby--;
+                    time_invincible = 1.5f;
+                    lectura_general.mtr_on = true; // Vibra el control
                 }
             }
         }
@@ -164,41 +203,6 @@ int main()
 
         actualizar_proyectil(&kirby.proyectil, DT);
 
-        if (kirby.proyectil.activo && enemies.activo)
-        {
-            if (hitbox_colision(kirby.proyectil.hitbox, enemies.hitbox))
-            {
-                if (kirby.proyectil.esEstrella)
-                {
-                    enemies.activo = false;
-                    switch (enemies.typeenemie)
-                    {
-                    case EN_WADLE:
-                        puntos_partida += PTS_WADLE;
-                        break;
-                    case EN_BRONTO:
-                        puntos_partida += PTS_BRONTO;
-                        break;
-                    case EN_GRIZZO:
-                        puntos_partida += PTS_GRIZZO;
-                        break;
-                    default:
-                        puntos_partida += 50;
-                        break;
-                    }
-                }
-                else
-                {
-                    enemies.x += kirby.proyectil.velX * 0.1f;
-                    actualizar_hitbox_enemie(&enemies);
-                }
-                kirby.proyectil.activo = false;
-            }
-        }
-
-        // Calcular la nuevas posiciones de los objetos en la pantalla
-        calc_pos_pantalla(&kirby, &enemies);
-
         // Dibujo
         ventana.limpiaVentana();
         dibujar_fondo(&kirby, FO_A, fullscreen);
@@ -211,11 +215,16 @@ int main()
             ventana.texto(300, 300, "GAME OVER - RECORD GUARDADO");
             ventana.actualizaVentana();
             ventana.espera(3000);
-            return 0;    
+            return 0;
         }
-        if (enemies.activo)
+        for (int i = 0; i < MAX_ENEMIGOS; i++)
         {
-            ventana.muestraImagenEscalada(enemies.screenX, enemies.screenY, ESCALA, ESCALA, animacion_actual(enemies.animActual));
+            if (!horda_1.enemigo[i].activo)
+                continue;
+            else
+            {
+                ventana.muestraImagenEscalada(horda_1.enemigo[i].screenX, horda_1.enemigo[i].screenY, ESCALA, ESCALA, animacion_actual(horda_1.enemigo[i].animActual));
+            }
         }
         if (kirby.proyectil.activo)
         {

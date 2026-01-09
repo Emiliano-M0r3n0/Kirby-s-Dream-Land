@@ -67,10 +67,15 @@
 #define TILE_SIZE 32   // Tamaño del sprite
 // Constantes para el valor de cada enemigo
 #define PTS_WADLE 100
+#define PTS_CAPPY 150
+#define PTS_POPPY 250
+#define PTS_TWIZZY 300
 #define PTS_BRONTO 200
 #define PTS_GRIZZO 500
 #define PTS_BOSS 1000
+#define MAX_ENEMIGOS 15
 
+/// @brief Estructura que guarda los datos de los mapas .csv
 typedef struct Mapa
 {
 
@@ -84,12 +89,6 @@ typedef struct Hitbox
     float x, y;
     float height, width;
 } Hitbox;
-
-typedef struct Obstaculos
-{
-    Hitbox box;
-    bool es_suelo;
-} Obstaculos;
 
 typedef struct Fondos
 {
@@ -212,6 +211,7 @@ typedef struct Kirby
     bool Gordito;         // Gordito o no gordito
     bool enSuelo;
     int enemies_eaten; // Numero de enemigos que ha comido
+    int puntos;
 
 } Kirby;
 
@@ -221,15 +221,20 @@ typedef struct Enemigo
     float x, y;
     int screenX, screenY;
     Hitbox hitbox;
-    Animacion arregloEnemies[EN_COUNT];
     Animacion *animActual;
     int typeenemie;
     int puntosEnemies;
     bool activo;
     float velX, velY;
-    int tipo;
     int direccion; // 1 para derecha, -1 para izquierda
 } Enemigo;
+
+typedef struct HordaEnemigos
+{
+    Enemigo enemigo[MAX_ENEMIGOS];
+    Animacion arregloAnimEnemies[EN_COUNT];
+    int enemigosactivos;
+}HordaEnemigos;
 
 /// @brief Inicializa los valores de offset, los pines y la placa vinculada al joystick
 /// @param Eje Direccion del Eje el cual inicializaremos
@@ -281,8 +286,16 @@ Imagen *animacion_actual(Animacion *anim);
 /// @param anim Estructura en la que se guardara
 void cargar_animacion(const char **rutas_img, const char **rutas_mask, int total_frames, int delay_frames, Animacion *anim);
 
+/// @brief Inicializa la estructura tipo camara con los parametros ingresados
+/// @param cam Direccion de la variable camara
+/// @param pantallaAncho Ancho de la pantalla
+/// @param pantallaAlto Alto de la pantalla
+/// @param fondoAncho Ancho del fondo que esta presentandose
+/// @param fondoAlto Alto del fondo que esta presentandose
 void ini_camara(Camara *cam, float pantallaAncho, float pantallaAlto, float fondoAncho, float fondoAlto);
 
+/// @brief Calcula el valor de las coordenadas que kirby debe de tener para que la camara este centrada en el
+/// @param kirby Direccion de la variable kirby
 void centrar_cam_kirby(Kirby *kirby);
 
 /// @brief Detecta la colision entre dos hitbox
@@ -337,12 +350,15 @@ void seleccionar_animacion_kirby(Kirby *k);
 
 /// @brief En base al tipo de enemigo, decide que animacion de enemigo selecciona
 /// @param enemies Direccion de la variable tipo enemigo
-void seleccionar_enemies(Enemigo *enemies);
+void seleccionar_enemies(HordaEnemigos *horda,int iteracion);
 
 /// @brief En base a el contenido del estomago de kirby decide que proyectil dispara
 /// @param kirby Direccion de la variable tipo kirby
 void seleccionar_proyectil(Kirby *kirby);
 
+/// @brief Crea los fondos que ingreses apartir de un arreglo de fondos
+/// @param fondos Direccion de la variable fondos
+/// @param rutas_fondos Arreglo de rutas de los fondos
 void crear_fondos(Fondos *fondos, const char **rutas_fondos);
 
 /// @brief Crea y actualiza las escalas y medidas de los fondos
@@ -355,16 +371,45 @@ void crear_escalas_fondos(Fondos *fondos, bool alto);
 /// @param indice Fondo que quieres imprimir
 void dibujar_fondo(Kirby *kirby, int indice, bool fs);
 
+/// @brief Calcula la posicion en la que se tienen que imprimir los personajes como kirby, sus proyectiles y los enemigos
+/// @param k Direccion de la variable kirby
+/// @param e Direccion de la variable de los enemigos
 void calc_pos_pantalla(Kirby *k, Enemigo *e);
 
+/// @brief Carga el archivo .csv a una matriz
+/// @param m Direccion de la variable mapa
+/// @param ruta Ruta del archivo .csv (ruta relativa/coma separated value)
 void cargar_colisiones(Mapa *m, const char *ruta);
 
+/// @brief Aplica las colisiones con el mapa apartir del archivo csv
+/// @param k Direccion de la variable kirby
 void aplicar_colisiones(Kirby *k);
 
+/// @brief Lee el archivo .dat para devolver la puntuacion mas alta
+/// @return Puntuacion mas alta registrada/ Si no hay archivo devuelve un 0
 int leer_record();
 
+/// @brief Guarda la puntuacion actual del jugador en el .dat
+/// @param puntos_actuales Puntuacion del jugador en la partida
 void guardar_record(int puntos_actuales);
 
-bool verificar_colision_entidades(Kirby *k, Enemigo *e);
+/// @brief Inicializa cada posicion del arreglo de enemigos
+/// @param lista Arreglo de enemigos que apareceran
+void inicializar_enemigos(HordaEnemigos *horda);
 
-#endif
+/// @brief Genera un enemigo en base a la posicion del arreglo
+/// @param horda Direccion de la variable tipo horda
+void generar_enemigo(HordaEnemigos *horda);
+
+/// @brief Aplica las colisiones con el mapa a los enemigos a partir del archivo .csv
+/// @param e Direccion de la variable enemigo
+/// @param m Direccion de la variable mapa
+/// @param dt DT
+void actualizar_enemigo(Enemigo *e, Mapa *m, float dt);
+
+/// @brief
+/// @param k 
+/// @param tipo_enemigo 
+void puntos_enemigo(Kirby *k, int tipo_enemigo);
+
+#endif 
