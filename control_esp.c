@@ -502,7 +502,12 @@ void seleccionar_animacion_kirby(Kirby *k)
 
 void seleccionar_enemies(HordaEnemigos *horda, int iteracion)
 {
+    if (iteracion < 0 || iteracion >= MAX_ENEMIGOS) return;
+    if (!horda->enemigo[iteracion].activo) return;
+    
     int indice = horda->enemigo[iteracion].typeenemie;
+    if (indice < 0 || indice >= EN_COUNT) return;
+    
     horda->enemigo[iteracion].animActual = &horda->arregloAnimEnemies[indice];
 }
 
@@ -542,7 +547,7 @@ void crear_fondos(Fondos *fondos, const char **rutas_fondos)
         else
         {
             fondos->cargado[i] = false;
-            fondos->alto_original[i] = 1; 
+            fondos->alto_original[i] = 1;
             fondos->ancho_original[i] = 1;
         }
     }
@@ -711,33 +716,54 @@ void guardar_record(int puntos_actuales)
 
 //---------Funciones para enemigos----------
 
+void inicializar_enemigo_default(Enemigo *e)
+{
+    e->activo = false;
+    e->x = 0.0f;
+    e->y = 0.0f;
+    e->screenX = 0;
+    e->screenY = 0;
+    e->velX = 0.0f;
+    e->velY = 0.0f;
+    e->direccion = 0;
+    e->typeenemie = 0;
+    e->animActual = NULL;
+
+    // Hitbox
+    e->hitbox.x = 0.0f;
+    e->hitbox.y = 0.0f;
+    e->hitbox.width = 0.0f;
+    e->hitbox.height = 0.0f;
+}
+
 void inicializar_enemigos(HordaEnemigos *horda)
 {
     horda->enemigosactivos = 0;
     for (int i = 0; i < MAX_ENEMIGOS; i++)
-        horda->enemigo[i].activo = false;
+    {
+        inicializar_enemigo_default(&horda->enemigo[i]);
+    }
 }
 
 void generar_enemigo(HordaEnemigos *horda)
 {
-    int posX[MAX_ENEMIGOS] = {760, 970, 1000, 1200, 1540, 1700, 1940, 2120, 2400, 2700, 3040, 3830, 4600, 5200};
-    int posY[MAX_ENEMIGOS] = {450, 450, 450, 450, 370, 370, 370, 450, 450, 140, 450, 290, 450, 450};
+    int posX[MAX_ENEMIGOS] = {760, 970, 1000, 1200, 1540, 1700, 1940, 2120, 2400, 2700, 3040, 3830, 4600, 5200,5200};
+    int posY[MAX_ENEMIGOS] = {450, 450, 450, 450, 370, 370, 370, 450, 450, 140, 450, 290, 450, 450,450};
     int indice = rand() % 14;
-    if (horda->enemigosactivos < MAX_ENEMIGOS)
+    for (int i = 0; i < MAX_ENEMIGOS; i++)
     {
-        for (int i = 0; i < MAX_ENEMIGOS; i++)
+        if (!horda->enemigo[i].activo)
         {
-            if (!horda->enemigo[i].activo)
-            {
-                horda->enemigo[i].x = posX[indice];
-                horda->enemigo[i].y = posY[indice];
-                horda->enemigo[i].typeenemie = rand() % 7;
-                horda->enemigo[i].direccion = -1;
-                horda->enemigo[i].velY = 0;
-                horda->enemigo[i].activo = true;
-                horda->enemigosactivos++;
-                break;
-            }
+            horda->enemigo[i].x = posX[indice];
+            horda->enemigo[i].y = posY[indice];
+            horda->enemigo[i].typeenemie = rand() % 7;
+            horda->enemigo[i].direccion = (rand() % 2) ? 1 : -1;
+            horda->enemigo[i].velY = 0;
+            horda->enemigo[i].activo = true;
+            horda->enemigosactivos++;
+
+            actualizar_hitbox_enemie(&horda->enemigo[i]);
+            break;
         }
     }
 }

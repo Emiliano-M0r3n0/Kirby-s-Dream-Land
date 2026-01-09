@@ -393,8 +393,10 @@ int leer_record();
 /// @param puntos_actuales Puntuacion del jugador en la partida
 void guardar_record(int puntos_actuales);
 
+void inicializar_enemigo_default(Enemigo *e);
+
 /// @brief Inicializa cada posicion del arreglo de enemigos
-/// @param lista Arreglo de enemigos que apareceran
+/// @param horda Arreglo de enemigos que apareceran
 void inicializar_enemigos(HordaEnemigos *horda);
 
 /// @brief Genera un enemigo en base a la posicion del arreglo

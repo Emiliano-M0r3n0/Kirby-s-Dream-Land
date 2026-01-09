@@ -136,10 +136,9 @@ int main()
 
         for (int i = 0; i < MAX_ENEMIGOS; i++)
         {
-            if (!horda_1.enemigo[i].activo)
-                continue;
+            if (!horda_1.enemigo[i].activo) continue;
 
-            // Solo procesar enemigos que están cerca de la pantalla (Culling para evitar LAG)
+            // Solo procesar enemigos que están cerca de la pantalla
             if (horda_1.enemigo[i].x > kirby.x - 600 && horda_1.enemigo[i].x < kirby.x + 600)
             {
 
